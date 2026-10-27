@@ -189,7 +189,9 @@ def run_batch(backend, mode, source: str, shots: int, qrng_shots: int, experimen
     return {
         "source": source,
         "backend": backend.name,
-        "job_id": jid,
+        # A local emulation's id is not an IBM job id; keep them apart so it can never be shown as hardware.
+        "job_id": jid if source == "HW" else None,
+        "local_run_id": None if source == "HW" else jid,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "versions": _versions(),
         "experiments": [pub_to_record(e, isa, result[i], pubs[i][2]) for i, (e, isa) in
