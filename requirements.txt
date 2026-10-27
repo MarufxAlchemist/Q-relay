@@ -15,3 +15,6 @@ jupyter==1.1.1
 nbconvert==7.17.2
 ipykernel==7.4.0
 httpx==0.28.1
+playwright==1.64.1
+markdown==3.11.2
+pymdown-extensions==12.3

@@ -122,7 +122,9 @@ def exact_fidelity(theta: float, phi: float, noise: NoiseSpec | None = None, var
     qc = teleport_circuit(theta, phi, variant, save_dm=True, conditional=True, barriers=False)
     if noise is not None:
         qc = apply_noise(qc, noise)
-    sim = AerSimulator(method="density_matrix", seed_simulator=seed)
+    # Readout error flips the classical bits that drive Bob's feed-forward (dynamic variant), so it changes rho_B.
+    sim = AerSimulator(method="density_matrix", seed_simulator=seed,
+                       noise_model=noise.readout_model() if noise is not None else None)
     res = sim.run(qc, shots=shots).result()
     dms = res.data()["rho_bob"]
     counts = res.get_counts()
@@ -264,7 +266,8 @@ def cardinal_state_test(noise: NoiseSpec | None = None, method: str = "exact", s
             qc = teleport_circuit(th, ph, save_dm=True, barriers=False)
             if noise is not None:
                 qc = apply_noise(qc, noise)
-            rho = AerSimulator(method="density_matrix", seed_simulator=1).run(qc, shots=256).result().data()["rho_bob"]
+            nm = noise.readout_model() if noise is not None else None
+            rho = AerSimulator(method="density_matrix", seed_simulator=1, noise_model=nm).run(qc, shots=2000).result().data()["rho_bob"]
             r = bloch_vector(rho)
             f = fidelity_pure(th, ph, rho)
         else:

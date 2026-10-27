@@ -43,13 +43,9 @@ def teleport_sweeps(quick: bool) -> None:
     curves = {
         "depolarizing (p1 = p2/10)": [avg_fidelity(NoiseSpec(p1=p / 10, p2=p)) for p in ps],
         "CX-only depolarizing": [avg_fidelity(NoiseSpec(p2=p)) for p in ps],
+        # readout error here corrupts Alice's feed-forward bits (Bob's state is read from its density matrix)
+        "depolarizing + readout (p/5)": [avg_fidelity(NoiseSpec(p1=p / 10, p2=p, readout=p / 5)) for p in ps],
     }
-    # The exact density-matrix path has no readout model, so the readout curve is measured by tomography
-    # (cardinal-state average, which equals the Haar average for this channel up to shot noise).
-    curves["depolarizing + readout (p/5)"] = [
-        np.mean([teleport.run_tomography(th, ph, NoiseSpec(p1=p / 10, p2=p, readout=p / 5), shots=2048,
-                                         seed=int(1000 * p) + k)["fidelity"]
-                 for k, (th, ph) in enumerate(teleport.CARDINAL_STATES.values())]) for p in ps]
     analytic = [teleport.analytic_cx_depolarizing_fidelity(p) for p in ps]
     dump("teleport_sweep_1d", {
         "p2": ps, "curves": curves, "analytic_cx_only": analytic,
@@ -72,7 +68,7 @@ def teleport_states(quick: bool) -> None:
     n = 60 if quick else 200
     angles = [pool.haar_angles() for _ in range(n)]
     ideal = teleport.haar_average(angles=angles)
-    noisy_spec = NoiseSpec(p1=0.01, p2=0.1, readout=0.02)
+    noisy_spec = NoiseSpec(p1=0.01, p2=0.1, readout=0.02)  # readout acts on Alice's feed-forward bits too
     noisy = teleport.haar_average(angles=angles, noise=noisy_spec)
     tomo = teleport.haar_average(angles=angles[: (30 if quick else 200)], method="tomography", shots=1024)
     card_ideal = teleport.cardinal_state_test()
