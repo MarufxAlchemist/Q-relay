@@ -4,6 +4,7 @@ import { MissionScene } from '../scenes/MissionScene'
 import { CircuitView, GATE_TO_OPS, TELEPORT_CIRCUIT } from '../components/CircuitView'
 import { BitLamp, FidelityGauge, NoiseSlider, Seg, SourceBadge } from '../components/controls'
 import { AmplitudeBars } from '../components/bits'
+import { Fill } from '../components/Fill'
 import { useLiveRerun, useMission } from '../hooks/useMission'
 import { CLASSICAL_BOUND, useStore } from '../store/useStore'
 import { angleBetween } from '../lib/three'
@@ -70,9 +71,9 @@ export function MissionControl() {
   const quantum = fidelity !== null && fidelity > CLASSICAL_BOUND
 
   return (
-    <div className="screen no-pad" style={{ display: 'grid', gridTemplateRows: 'auto 1fr 236px', height: '100%' }}>
+    <div className="screen no-pad" style={{ display: 'grid', gridTemplateRows: 'auto 1fr 196px', height: '100%' }}>
       {/* top rail */}
-      <div className="row" style={{ padding: '10px 18px', gap: 18, borderBottom: '1px solid var(--line)' }}>
+      <div className="row" style={{ padding: '6px 12px', gap: 14, borderBottom: '1px solid var(--line)' }}>
         <div className="row" style={{ gap: 6 }}>
           {STAGES.map((s, i) => {
             const idx = STAGES.findIndex((x) => x.key === stage)
@@ -155,8 +156,8 @@ export function MissionControl() {
       </div>
 
       {/* bottom strip */}
-      <div className="grid" style={{ gridTemplateColumns: '1fr 1.5fr 1.2fr', padding: '0 14px 14px', gap: 12, minHeight: 0 }}>
-        <div className="panel">
+      <div className="grid" style={{ gridTemplateColumns: '1fr 1.5fr 1.2fr', padding: '0 10px 8px', gap: 8, minHeight: 0 }}>
+        <div className="panel flex">
           <h3>1 · Entropy pool <span className="grow" /><SourceBadge source="SIM" /></h3>
           {qrng ? (
             <>
@@ -171,16 +172,16 @@ export function MissionControl() {
             </>
           ) : <div className="tip">Waiting for launch. Note: simulator bits are pseudo-random under the hood; only hardware bits are physically random.</div>}
         </div>
-        <div className="panel">
+        <div className="panel flex">
           <h3>2 · Teleportation circuit (dynamic: mid-circuit measurement + feed-forward)</h3>
-          <CircuitView circuit={TELEPORT_CIRCUIT} highlight={highlight} qubitLabels={['q0 ψ', 'q1 A', 'q2 B']} height={150} />
+          <Fill minH={50}>{(_, h) => <CircuitView circuit={TELEPORT_CIRCUIT} highlight={highlight} qubitLabels={['q0 ψ', 'q1 A', 'q2 B']} height={h} />}</Fill>
         </div>
-        <div className="panel">
+        <div className="panel flex">
           <h3>3 · Distributed Deutsch–Jozsa <span className="grow" />{byType['oracle_chosen'] && <span className="mono dim">n={byType['oracle_chosen'].data.n}</span>}</h3>
           {djAmp ? (
             <>
               <div className="mono dim" style={{ fontSize: 10 }}>{djAmp.stage.toUpperCase()}</div>
-              <AmplitudeBars re={djAmp.re} n={byType['oracle_chosen']?.data.n ?? 3} height={110} highlightZero />
+              <Fill minH={50}>{(w, h) => <AmplitudeBars re={djAmp.re} n={byType['oracle_chosen']?.data.n ?? 3} width={w} height={h} highlightZero />}</Fill>
             </>
           ) : <div className="tip">Bob's ancilla is a teleported |−⟩. If teleportation is noisy, the ancilla is imperfect and DJ degrades: one noise slider affects all three stages.</div>}
           {verdict && (

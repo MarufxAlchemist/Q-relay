@@ -2,7 +2,7 @@
 
 **Setup (before judges arrive):** run `.\tasks.ps1 demo` (Windows) or `make demo`, then open http://127.0.0.1:8000 full-screen (F11). Press **L** if the laptop struggles (low-power mode), and **P** for presenter captions on a projector. Everything runs offline.
 
-Hotkeys: `1–7` screens · `D` auto-demo (90 s) · `P` presenter captions · `L` low power · `S` scanlines.
+The app starts on the title screen: click **NEW MISSION** (first time: the Mission Guide opens; press Skip or walk judges through it). Hotkeys: `1–7` screens · `D` auto-demo (90 s, works from the title screen) · `H` plain-English help · `G` guide · `M` music · `Esc` title menu · `P` presenter captions · `L` low power · `S` scanlines.
 
 ---
 

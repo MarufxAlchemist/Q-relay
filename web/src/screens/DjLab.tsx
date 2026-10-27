@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { api, type DJResult, type OracleInfo } from '../lib/api'
 import { AmplitudeBars, TruthTiles } from '../components/bits'
 import { CircuitView } from '../components/CircuitView'
 import { BarChart, Heatmap, LineChart } from '../components/charts'
+import { Fill, Panel } from '../components/Fill'
 import { NoiseSlider, Seg, SourceBadge } from '../components/controls'
 import { useStore } from '../store/useStore'
 
@@ -97,115 +97,95 @@ export function DjLab() {
   const countsSorted = res ? Object.entries(res.counts).sort((a, b) => b[1] - a[1]).slice(0, 12) : []
   const nd = noiseData?.by_n?.[String(Math.min(Math.max(n, 2), 6))] ?? noiseData?.by_n?.['3']
 
+  const tileSize = (w: number, h: number) => {
+    const N = 2 ** n, cols = Math.min(16, 2 ** Math.ceil(Math.log2(N) / 2)), rows = Math.ceil(N / cols)
+    return Math.max(8, Math.min(34, Math.floor(Math.min((w - 4 * cols) / cols, (h - 4 * rows) / rows))))
+  }
+  const nn = String(Math.min(Math.max(n, 2), 6))
+
   return (
     <div className="screen">
-      <div className="grid" style={{ gridTemplateColumns: '1fr 1.5fr 1fr', gap: 12 }}>
-        <div className="panel">
-          <h3>Oracle gallery</h3>
+      <div className="fit" style={{ gridTemplateColumns: '0.95fr 1.55fr 1fr', gridTemplateRows: '1.3fr 1fr' }}>
+        <Panel title="Oracle gallery">
           <div className="row"><span className="lbl">n</span><Seg value={n} options={[1, 2, 3, 4, 5, 6, 7, 8] as const} onChange={setN} /></div>
-          <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 10 }}>
+          <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 4, marginTop: 6 }}>
             {oracles.map((o) => (
               <button key={o.name} onClick={() => setOracle(o.name)} className="panel"
-                style={{ cursor: 'pointer', textAlign: 'left', padding: '8px 10px', borderColor: o.name.startsWith(oracle) ? 'var(--cyan)' : undefined,
+                style={{ cursor: 'pointer', textAlign: 'left', padding: '4px 8px', borderColor: o.name.startsWith(oracle) ? 'var(--cyan)' : undefined,
                   boxShadow: o.name.startsWith(oracle) ? '0 0 12px rgba(34,228,255,0.25)' : undefined, color: 'var(--text)' }}>
-                <div className="mono" style={{ fontSize: 12 }}>{o.name}</div>
-                <div className="mono" style={{ fontSize: 10, color: o.kind === 'constant' ? 'var(--cyan)' : 'var(--magenta)' }}>{o.kind} · {o.cx} CX</div>
+                <div className="mono" style={{ fontSize: 11.5 }}>{o.name}</div>
+                <div className="mono" style={{ fontSize: 9.5, color: o.kind === 'constant' ? 'var(--cyan)' : 'var(--magenta)' }}>{o.kind} · {o.cx} CX</div>
               </button>
             ))}
           </div>
-          <div className="row" style={{ marginTop: 10 }}>
+          <div className="row" style={{ marginTop: 6 }}>
             <Seg value={distributed ? 'teleported' : 'local'} options={['local', 'teleported'] as const} onChange={(v) => setDistributed(v === 'teleported')} labels={{ local: 'local ancilla', teleported: 'teleported ancilla' }} />
           </div>
-          <div style={{ marginTop: 10 }}><NoiseSlider compact /></div>
-          <div className="row" style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 4 }}><NoiseSlider compact /></div>
+          <div className="row" style={{ marginTop: 6 }}>
             <button className="btn magenta" onClick={run}>Run (1 query)</button>
-            <button className="btn" onClick={play}>Replay steps</button>
+            <button className="btn" onClick={play}>Replay</button>
           </div>
-          {err && <div className="red mono" style={{ fontSize: 11, marginTop: 6 }}>{err}</div>}
-          {res && (
-            <>
-              <h3 style={{ marginTop: 14 }}>Truth table f(x) (lit = 1) <span className="grow" /><span className="mono dim">{2 ** n} inputs</span></h3>
-              <TruthTiles table={res.oracle.truth_table} n={n} size={n <= 4 ? 30 : n <= 6 ? 18 : 11} />
-            </>
-          )}
-        </div>
+          {err && <div className="red mono" style={{ fontSize: 11 }}>{err}</div>}
+          <h3 style={{ marginTop: 8 }}>Truth table f(x) · lit = 1<span className="grow" /><span className="mono dim">{2 ** n} inputs</span></h3>
+          {res && <Fill minH={40}>{(w, h) => <TruthTiles table={res.oracle.truth_table} n={n} size={tileSize(w, h)} />}</Fill>}
+        </Panel>
 
-        <div className="panel">
-          <h3>Input-register amplitudes <span className="grow" /><span className="mono cyan">{st ? STAGE_TITLES[st.stage] : ''}</span></h3>
-          <div className="row" style={{ gap: 4, marginBottom: 6 }}>
+        <Panel title="Input-register amplitudes" right={<span className="mono cyan">{st ? STAGE_TITLES[st.stage] : ''}</span>}>
+          <div className="row" style={{ gap: 4 }}>
             {res?.steps.map((s, i) => (
-              <button key={s.stage} className="btn" style={{ padding: '4px 9px', opacity: i === stage ? 1 : 0.55 }} onClick={() => setStage(i)}>{STAGE_TITLES[s.stage]}</button>
+              <button key={s.stage} className="btn" style={{ padding: '3px 8px', opacity: i === stage ? 1 : 0.5 }} onClick={() => setStage(i)}>{STAGE_TITLES[s.stage]}</button>
             ))}
           </div>
-          {st && <AmplitudeBars re={st.re} n={n} height={220} highlightZero={st.stage === 'interference'} />}
-          <AnimatePresence mode="wait">
-            <motion.div key={st?.stage} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ fontSize: 14, lineHeight: 1.5, minHeight: 64 }}>
-              {st?.caption}
-              {st && <div className="mono dim" style={{ fontSize: 11, marginTop: 4 }}>ancilla Bloch vector: ({st.ancilla_bloch.map((v) => v.toFixed(2)).join(', ')}) = |−⟩, unchanged by the query</div>}
-            </motion.div>
-          </AnimatePresence>
+          {st && <Fill minH={80}>{(w, h) => <AmplitudeBars re={st.re} n={n} width={w} height={h} highlightZero={st.stage === 'interference'} />}</Fill>}
+          <div style={{ fontSize: 13, lineHeight: 1.4, minHeight: 36 }}>{st?.caption}</div>
           {res && (
-            <AnimatePresence>
-              <motion.div key={`${res.oracle.name}-${res.verdict}`} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                className="row" style={{ justifyContent: 'space-between', marginTop: 8, padding: '10px 14px', borderRadius: 6,
-                  border: `1px solid ${res.verdict === 'constant' ? 'var(--cyan)' : 'var(--magenta)'}`,
-                  background: res.verdict === 'constant' ? 'rgba(34,228,255,0.08)' : 'rgba(255,61,165,0.08)' }}>
-                <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.2em', color: res.verdict === 'constant' ? 'var(--cyan)' : 'var(--magenta)' }}>
-                  {res.verdict.toUpperCase()}
-                </span>
-                <span className={res.correct ? 'green' : 'red'} style={{ fontSize: 15 }}>{res.correct ? '✓ ground truth' : '✗ wrong (noise)'}</span>
-                <span className="mono dim">P(0…0) exact {res.p_all_zeros_exact.toFixed(3)} · measured {res.p_all_zeros.toFixed(3)}</span>
-              </motion.div>
-            </AnimatePresence>
+            <div className="row" style={{ justifyContent: 'space-between', marginTop: 4, padding: '5px 10px', borderRadius: 6,
+              border: `1px solid ${res.verdict === 'constant' ? 'var(--cyan)' : 'var(--magenta)'}`,
+              background: res.verdict === 'constant' ? 'rgba(34,228,255,0.08)' : 'rgba(255,61,165,0.08)' }}>
+              <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '0.2em', color: res.verdict === 'constant' ? 'var(--cyan)' : 'var(--magenta)' }}>{res.verdict.toUpperCase()}</span>
+              <span className={res.correct ? 'green' : 'red'}>{res.correct ? '✓ matches the truth' : '✗ wrong (noise)'}</span>
+              <span className="mono dim" style={{ fontSize: 11 }}>P(0…0) exact {res.p_all_zeros_exact.toFixed(2)} · measured {res.p_all_zeros.toFixed(3)}</span>
+            </div>
           )}
-          {res && <div style={{ marginTop: 10 }}><CircuitView circuit={res.circuit} height={distributed ? 200 : 170} /></div>}
-        </div>
+          {res && <div style={{ height: distributed ? 150 : 120, marginTop: 4 }}><CircuitView circuit={res.circuit} height={distributed ? 150 : 120} /></div>}
+        </Panel>
 
-        <div className="grid" style={{ gap: 12, alignContent: 'start' }}>
-          <div className="panel">
-            <h3>Query race <span className="grow" /><button className="btn" style={{ padding: '3px 8px' }} onClick={() => setRace((x) => x + 1)}>race</button></h3>
+        <div className="stack">
+          <Panel title="Query race" right={<button className="btn" style={{ padding: '2px 8px' }} onClick={() => setRace((x) => x + 1)}>race</button>}>
             <QueryRace n={n} go={race} />
-          </div>
-          <div className="panel">
-            <h3>Measured outcomes (2048 shots) <span className="grow" /><SourceBadge source="SIM" /></h3>
-            {res && <BarChart labels={countsSorted.map(([k]) => k)} values={countsSorted.map(([, v]) => v)}
-              colors={countsSorted.map(([k]) => (/^0+$/.test(k) ? '#22E4FF' : '#FF3DA5'))} height={170} valueFmt={(v) => String(v)} />}
-            <div className="tip">All-zeros ⇒ constant. Anything else ⇒ balanced.</div>
-          </div>
+          </Panel>
+          <Panel title="Measured outcomes (2048 shots)" right={<SourceBadge source="SIM" />} style={{ flex: 1 }}>
+            {res && <Fill>{(w, h) => <BarChart width={w} height={h} labels={countsSorted.map(([k]) => k)} values={countsSorted.map(([, v]) => v)}
+              colors={countsSorted.map(([k]) => (/^0+$/.test(k) ? '#22E4FF' : '#FF3DA5'))} valueFmt={(v) => String(v)} />}</Fill>}
+            <div className="tip">All zeros ⇒ constant. Anything else ⇒ balanced.</div>
+          </Panel>
         </div>
-      </div>
 
-      <div className="grid" style={{ gridTemplateColumns: '1fr 1.2fr 1fr', gap: 12, marginTop: 12 }}>
-        <div className="panel">
-          <h3>Query complexity (log scale)</h3>
-          {complexity && (
-            <LineChart height={230} logY legendPos="br" xLabel="input bits n" yLabel="oracle queries"
-              series={[
-                { name: 'classical deterministic 2^(n−1)+1', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map((r: any) => r.classical_worst), color: '#FF3DA5' },
-                { name: 'adversary simulation', x: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.n), y: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.adversary), color: '#FFB020', dashed: true },
-                { name: 'quantum (Deutsch–Jozsa)', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map(() => 1), color: '#22E4FF' },
-              ]} />
-          )}
-          <div className="tip">A randomized classical algorithm with k agreeing queries errs with probability ≤ 2^−(k−1). DJ is exact with 1 query.</div>
-        </div>
-        <div className="panel">
-          <h3>Success vs noise, n = {Math.min(Math.max(n, 2), 6)} <span className="grow" /><SourceBadge source="SIM" /></h3>
-          {nd && noiseData && (
-            <LineChart height={230} yMin={0} yMax={1} legendPos="bl" xLabel="2-qubit depolarizing p₂ (p₁ = p₂/10)" yLabel="P(correct)"
-              series={Object.entries(nd).map(([k, v]: [string, any], i) => ({
-                name: `${k} (${v.cx} CX)`, x: noiseData.levels_p2, y: v.success,
-                color: ['#22E4FF', '#5ab8ff', '#FF3DA5', '#8B5CF6', '#FFB020', '#2EE59D'][i % 6], dashed: v.kind === 'constant',
-              }))}
-              hLines={[{ y: 1 - 2 ** -Math.min(Math.max(n, 2), 6), label: 'balanced floor 1−2⁻ⁿ', color: '#56627a' }]} />
-          )}
-          <div className="tip">
-            Deeper oracles (random balanced: many MCX) decay fastest. Caveat: under total depolarization outcomes become uniform. Balanced oracles then "succeed" with 1−2⁻ⁿ by chance, so compare against the constant curves.
-          </div>
-        </div>
-        <div className="panel">
-          <h3>Which stage hurts more? (distributed DJ, parity n=3)</h3>
-          {heat?.parity && <Heatmap grid={heat.parity.success} xs={heat.parity.levels} ys={heat.parity.levels} xLabel="oracle-stage noise p₂" yLabel="teleport-stage noise p₂" min={0.5} max={1} cellText height={250} />}
-          <div className="tip">With a perfect oracle, P(success | balanced) = ⟨−|ρ_anc|−⟩, the teleportation fidelity of the ancilla. Proved in THEORY.md and checked in tests.</div>
+        <div className="grid" style={{ gridColumn: 'span 3', gridTemplateColumns: '1fr 1.25fr 1fr', gap: 8, minHeight: 0 }}>
+          <Panel title="Query complexity (log scale)">
+            {complexity && <Fill>{(w, h) => (
+              <LineChart width={w} height={h} logY legendPos="br" xLabel="input bits n"
+                series={[
+                  { name: 'classical 2^(n−1)+1', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map((r: any) => r.classical_worst), color: '#FF3DA5' },
+                  { name: 'adversary (measured)', x: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.n), y: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.adversary), color: '#FFB020', dashed: true },
+                  { name: 'quantum: 1', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map(() => 1), color: '#22E4FF' },
+                ]} />
+            )}</Fill>}
+          </Panel>
+          <Panel title={`Success vs noise, n = ${nn}`} right={<SourceBadge source="SIM" />}>
+            {nd && noiseData && <Fill>{(w, h) => (
+              <LineChart width={w} height={h} yMin={0} yMax={1} legendPos="bl" xLabel="depolarizing p₂ (p₁ = p₂/10)"
+                series={Object.entries(nd).map(([k, v]: [string, any], i) => ({
+                  name: `${k} (${v.cx} CX)`, x: noiseData.levels_p2, y: v.success,
+                  color: ['#22E4FF', '#5ab8ff', '#FF3DA5', '#8B5CF6', '#FFB020', '#2EE59D'][i % 6], dashed: v.kind === 'constant',
+                }))}
+                hLines={[{ y: 1 - 2 ** -Number(nn), label: 'chance floor 1−2⁻ⁿ', color: '#56627a' }]} />
+            )}</Fill>}
+          </Panel>
+          <Panel title="Which stage hurts more? (parity, n=3)">
+            {heat?.parity && <Fill>{(w, h) => <Heatmap width={w} height={h} grid={heat.parity.success} xs={heat.parity.levels} ys={heat.parity.levels} xLabel="oracle-stage noise" yLabel="teleport-stage noise" min={0.5} max={1} cellText />}</Fill>}
+          </Panel>
         </div>
       </div>
     </div>

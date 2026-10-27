@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { LineChart } from '../components/charts'
+import { Fill } from '../components/Fill'
 import { CLASSICAL_BOUND } from '../store/useStore'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -65,14 +66,14 @@ export function Report() {
             The full written report is in docs/REPORT.md. Report figures are regenerated from real runs by scripts/build_report_figures.py. Theory and derivations are in docs/THEORY.md.
           </div>
         </div>
-        <div className="panel">
+        <div className="panel flex">
           <h3>Headline result: quantum-advantage threshold</h3>
-          {sw && (
-            <LineChart height={240} yMin={0.5} yMax={1} xLabel="p₂" yLabel="F_avg"
+          {sw && <Fill minH={220}>{(w, h) => (
+            <LineChart width={w} height={h} yMin={0.5} yMax={1} xLabel="p₂" yLabel="F_avg"
               series={[{ name: 'depolarizing', x: sw.p2, y: sw.curves['depolarizing (p1 = p2/10)'], color: '#22E4FF' }]}
               hLines={[{ y: CLASSICAL_BOUND, label: '2/3', color: '#FFB020' }]}
               markers={sw.crossings['depolarizing (p1 = p2/10)'] ? [{ x: sw.crossings['depolarizing (p1 = p2/10)'], y: CLASSICAL_BOUND, label: `p₂* ≈ ${sw.crossings['depolarizing (p1 = p2/10)'].toFixed(3)}`, color: '#FF3DA5' }] : []} />
-          )}
+          )}</Fill>}
         </div>
         <div className="panel" style={{ gridColumn: 'span 2' }}>
           <h3>Honesty notes</h3>

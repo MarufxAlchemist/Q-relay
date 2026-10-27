@@ -21,7 +21,7 @@ interface LineProps {
   vLine?: { x: number; color: string; label?: string }
 }
 
-const M = { l: 46, r: 12, t: 10, b: 30 }
+const M = { l: 48, r: 10, t: 10, b: 32 }
 
 function ticks(min: number, max: number, n = 5): number[] {
   const span = max - min || 1
@@ -51,15 +51,15 @@ export function LineChart({ series, width = 460, height = 220, xLabel, yLabel, y
   const xt = ticks(x0, x1, 6)
   const path = (s: Series) => s.x.map((x, i) => `${i ? 'L' : 'M'}${sx(x).toFixed(1)},${sy(s.y[i]).toFixed(1)}`).join('')
   return (
-    <svg width="100%" viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
       {yt.map((v) => (
         <g key={v}>
           <line x1={M.l} x2={width - M.r} y1={sy(v)} y2={sy(v)} stroke="rgba(120,160,220,0.1)" />
-          <text x={M.l - 6} y={sy(v) + 3} textAnchor="end" fontSize="9.5" fill="#8b97ad" fontFamily="JetBrains Mono">{fmt(v)}</text>
+          <text x={M.l - 6} y={sy(v) + 3} textAnchor="end" fontSize="10.5" fill="#8b97ad" fontFamily="JetBrains Mono">{fmt(v)}</text>
         </g>
       ))}
       {xt.map((v) => (
-        <text key={v} x={sx(v)} y={height - M.b + 14} textAnchor="middle" fontSize="9.5" fill="#8b97ad" fontFamily="JetBrains Mono">{fmt(v)}</text>
+        <text key={v} x={sx(v)} y={height - M.b + 14} textAnchor="middle" fontSize="10.5" fill="#8b97ad" fontFamily="JetBrains Mono">{fmt(v)}</text>
       ))}
       {band && (
         <path d={band.x.map((x, i) => `${i ? 'L' : 'M'}${sx(x)},${sy(band.hi[i])}`).join('') +
@@ -69,7 +69,7 @@ export function LineChart({ series, width = 460, height = 220, xLabel, yLabel, y
       {hLines?.map((h) => (
         <g key={h.label}>
           <line x1={M.l} x2={width - M.r} y1={sy(h.y)} y2={sy(h.y)} stroke={h.color} strokeDasharray="5 4" strokeWidth={1.2} />
-          <text x={width - M.r - 4} y={sy(h.y) - 4} textAnchor="end" fontSize="9.5" fill={h.color} fontFamily="JetBrains Mono">{h.label}</text>
+          <text x={width - M.r - 4} y={sy(h.y) - 4} textAnchor="end" fontSize="10.5" fill={h.color} fontFamily="JetBrains Mono">{h.label}</text>
         </g>
       ))}
       {vLine && <line x1={sx(vLine.x)} x2={sx(vLine.x)} y1={M.t} y2={M.t + H} stroke={vLine.color} strokeDasharray="3 3" />}
@@ -80,19 +80,19 @@ export function LineChart({ series, width = 460, height = 220, xLabel, yLabel, y
       {markers?.map((m) => (
         <g key={m.label}>
           <circle cx={sx(m.x)} cy={sy(m.y)} r={4.5} fill="none" stroke={m.color} strokeWidth={1.6} />
-          <text x={sx(m.x) + 7} y={sy(m.y) + 12} fontSize="9.5" fill={m.color} fontFamily="JetBrains Mono">{m.label}</text>
+          <text x={sx(m.x) + 7} y={sy(m.y) + 12} fontSize="10.5" fill={m.color} fontFamily="JetBrains Mono">{m.label}</text>
         </g>
       ))}
       <line x1={M.l} x2={M.l} y1={M.t} y2={M.t + H} stroke="rgba(120,160,220,0.3)" />
       <line x1={M.l} x2={width - M.r} y1={M.t + H} y2={M.t + H} stroke="rgba(120,160,220,0.3)" />
-      {xLabel && <text x={M.l + W / 2} y={height - 3} textAnchor="middle" fontSize="10" fill="#8b97ad">{xLabel}</text>}
-      {yLabel && <text x={11} y={M.t + H / 2} textAnchor="middle" fontSize="10" fill="#8b97ad" transform={`rotate(-90 11 ${M.t + H / 2})`}>{yLabel}</text>}
+      {xLabel && <text x={M.l + W / 2} y={height - 3} textAnchor="middle" fontSize="11" fill="#8b97ad">{xLabel}</text>}
+      {yLabel && <text x={11} y={M.t + H / 2} textAnchor="middle" fontSize="11" fill="#8b97ad" transform={`rotate(-90 11 ${M.t + H / 2})`}>{yLabel}</text>}
       {legend && series.length > 1 && (
         <g>
           {series.map((s, i) => (
             <g key={s.name} transform={`translate(${legendPos.endsWith('r') ? width - M.r - 190 : M.l + 8},${legendPos.startsWith('b') ? M.t + H - 8 - (series.length - 1 - i) * 13 : M.t + 8 + i * 13})`}>
               <line x1={0} x2={14} y1={0} y2={0} stroke={s.color} strokeWidth={2} strokeDasharray={s.dashed ? '4 3' : undefined} />
-              <text x={19} y={3} fontSize="9.5" fill="#c9d3e6">{s.name}</text>
+              <text x={19} y={3} fontSize="10.5" fill="#c9d3e6">{s.name}</text>
             </g>
           ))}
         </g>
@@ -111,11 +111,11 @@ export function BarChart({ labels, values, colors, width = 460, height = 200, yM
   const sy = (v: number) => M.t + H - (v / (top || 1)) * H
   const bw = W / values.length
   return (
-    <svg width="100%" viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
       {ticks(0, top).map((v) => (
         <g key={v}>
           <line x1={M.l} x2={width - M.r} y1={sy(v)} y2={sy(v)} stroke="rgba(120,160,220,0.1)" />
-          <text x={M.l - 6} y={sy(v) + 3} textAnchor="end" fontSize="9.5" fill="#8b97ad" fontFamily="JetBrains Mono">{fmt(v)}</text>
+          <text x={M.l - 6} y={sy(v) + 3} textAnchor="end" fontSize="10.5" fill="#8b97ad" fontFamily="JetBrains Mono">{fmt(v)}</text>
         </g>
       ))}
       {band && <rect x={M.l} width={W} y={sy(band.hi)} height={sy(band.lo) - sy(band.hi)} fill={band.color} opacity={0.15} />}
@@ -123,16 +123,16 @@ export function BarChart({ labels, values, colors, width = 460, height = 200, yM
         <g key={i}>
           <rect x={M.l + i * bw + bw * 0.15} width={bw * 0.7} y={sy(v)} height={Math.max(0, M.t + H - sy(v))}
             fill={colors?.[i] ?? '#22E4FF'} opacity={0.85} rx={2} />
-          <text x={M.l + i * bw + bw / 2} y={sy(v) - 4} textAnchor="middle" fontSize="9.5" fill="#e6ecf7" fontFamily="JetBrains Mono">
+          <text x={M.l + i * bw + bw / 2} y={sy(v) - 4} textAnchor="middle" fontSize="10.5" fill="#e6ecf7" fontFamily="JetBrains Mono">
             {valueFmt ? valueFmt(v) : fmt(v)}
           </text>
-          <text x={M.l + i * bw + bw / 2} y={height - M.b + 14} textAnchor="middle" fontSize="9.5" fill="#8b97ad" fontFamily="JetBrains Mono">{labels[i]}</text>
+          <text x={M.l + i * bw + bw / 2} y={height - M.b + 14} textAnchor="middle" fontSize="10.5" fill="#8b97ad" fontFamily="JetBrains Mono">{labels[i]}</text>
         </g>
       ))}
       {refLine && (
         <g>
           <line x1={M.l} x2={width - M.r} y1={sy(refLine.y)} y2={sy(refLine.y)} stroke={refLine.color} strokeDasharray="5 4" />
-          <text x={width - M.r - 4} y={sy(refLine.y) - 4} textAnchor="end" fontSize="9.5" fill={refLine.color} fontFamily="JetBrains Mono">{refLine.label}</text>
+          <text x={width - M.r - 4} y={sy(refLine.y) - 4} textAnchor="end" fontSize="10.5" fill={refLine.color} fontFamily="JetBrains Mono">{refLine.label}</text>
         </g>
       )}
       <line x1={M.l} x2={width - M.r} y1={M.t + H} y2={M.t + H} stroke="rgba(120,160,220,0.3)" />
@@ -174,7 +174,7 @@ export function Heatmap({ grid, xs, ys, xLabel, yLabel, min, max, pivot, width =
     return e
   }, [grid, contour, rows, cols, cw, ch, H])
   return (
-    <svg width="100%" viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
       {grid.map((row, r) => row.map((v, c) => (
         <g key={`${r}-${c}`}>
           <rect x={M.l + c * cw} y={M.t + H - (r + 1) * ch} width={cw + 0.5} height={ch + 0.5} fill={heatColor(v, lo, hi, pivot)} />
@@ -189,8 +189,8 @@ export function Heatmap({ grid, xs, ys, xLabel, yLabel, min, max, pivot, width =
       {(rowLabels ?? ys?.map((y) => fmt(y)))?.map((l, r) => (rows <= 14 || r % 2 === 0) && (
         <text key={r} x={M.l - 5} y={M.t + H - (r + 0.5) * ch + 3} textAnchor="end" fontSize="9" fill="#8b97ad" fontFamily="JetBrains Mono">{l}</text>
       ))}
-      {xLabel && <text x={M.l + W / 2} y={height - 3} textAnchor="middle" fontSize="10" fill="#8b97ad">{xLabel}</text>}
-      {yLabel && <text x={11} y={M.t + H / 2} textAnchor="middle" fontSize="10" fill="#8b97ad" transform={`rotate(-90 11 ${M.t + H / 2})`}>{yLabel}</text>}
+      {xLabel && <text x={M.l + W / 2} y={height - 3} textAnchor="middle" fontSize="11" fill="#8b97ad">{xLabel}</text>}
+      {yLabel && <text x={11} y={M.t + H / 2} textAnchor="middle" fontSize="11" fill="#8b97ad" transform={`rotate(-90 11 ${M.t + H / 2})`}>{yLabel}</text>}
     </svg>
   )
 }
@@ -207,22 +207,22 @@ export function Histogram({ values, bins = 20, min = 0, max = 1, color = '#22E4F
   const bw = W / bins
   const sx = (x: number) => M.l + ((x - min) / (max - min)) * W
   return (
-    <svg width="100%" viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
       {counts.map((c, i) => (
         <rect key={i} x={M.l + i * bw + 1} width={bw - 2} y={M.t + H - (c / top) * H} height={(c / top) * H} fill={color} opacity={0.8} />
       ))}
       {ticks(min, max, 5).map((v) => (
-        <text key={v} x={sx(v)} y={height - M.b + 14} textAnchor="middle" fontSize="9.5" fill="#8b97ad" fontFamily="JetBrains Mono">{fmt(v)}</text>
+        <text key={v} x={sx(v)} y={height - M.b + 14} textAnchor="middle" fontSize="10.5" fill="#8b97ad" fontFamily="JetBrains Mono">{fmt(v)}</text>
       ))}
-      <text x={M.l - 6} y={M.t + 8} textAnchor="end" fontSize="9.5" fill="#8b97ad" fontFamily="JetBrains Mono">{top}</text>
+      <text x={M.l - 6} y={M.t + 8} textAnchor="end" fontSize="10.5" fill="#8b97ad" fontFamily="JetBrains Mono">{top}</text>
       {refLine && (
         <g>
           <line x1={sx(refLine.x)} x2={sx(refLine.x)} y1={M.t} y2={M.t + H} stroke={refLine.color} strokeDasharray="5 4" />
-          <text x={sx(refLine.x) + 4} y={M.t + 10} fontSize="9.5" fill={refLine.color} fontFamily="JetBrains Mono">{refLine.label}</text>
+          <text x={sx(refLine.x) + 4} y={M.t + 10} fontSize="10.5" fill={refLine.color} fontFamily="JetBrains Mono">{refLine.label}</text>
         </g>
       )}
       <line x1={M.l} x2={width - M.r} y1={M.t + H} y2={M.t + H} stroke="rgba(120,160,220,0.3)" />
-      {xLabel && <text x={M.l + W / 2} y={height - 3} textAnchor="middle" fontSize="10" fill="#8b97ad">{xLabel}</text>}
+      {xLabel && <text x={M.l + W / 2} y={height - 3} textAnchor="middle" fontSize="11" fill="#8b97ad">{xLabel}</text>}
     </svg>
   )
 }

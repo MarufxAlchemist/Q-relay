@@ -11,7 +11,18 @@ export interface MissionEvent {
   data: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
+const load = (k: string) => { try { return localStorage.getItem(k) } catch { return null } }
+export const save = (k: string, v: string) => { try { localStorage.setItem(k, v) } catch { /* private mode */ } }
+
 interface State {
+  title: boolean
+  setTitle: (t: boolean) => void
+  guide: boolean
+  setGuide: (g: boolean) => void
+  help: boolean
+  setHelp: (h: boolean) => void
+  music: boolean
+  setMusic: (m: boolean) => void
   screen: Screen
   setScreen: (s: Screen) => void
   booted: boolean
@@ -54,8 +65,16 @@ interface State {
 const Z: Vec3 = [0, 0, 1]
 
 export const useStore = create<State>((set) => ({
-  screen: 'mission',
-  setScreen: (screen) => set({ screen }),
+  title: true,
+  setTitle: (title) => set({ title }),
+  guide: false,
+  setGuide: (guide) => set({ guide }),
+  help: false,
+  setHelp: (help) => set({ help }),
+  music: load('qrelay.music') !== 'off',
+  setMusic: (music) => { save('qrelay.music', music ? 'on' : 'off'); set({ music }) },
+  screen: (load('qrelay.screen') as Screen) || 'mission',
+  setScreen: (screen) => { save('qrelay.screen', screen); set({ screen }) },
   booted: false,
   setBooted: (booted) => set({ booted }),
   backendOk: null,

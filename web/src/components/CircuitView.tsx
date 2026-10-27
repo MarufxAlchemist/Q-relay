@@ -33,7 +33,7 @@ export function CircuitView({ circuit, highlight = [], qubitLabels, height }: {
   const qy = (q: number) => y0 + q * dy
   const cx = (c: number) => x0 + c * dx + dx / 2
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', maxHeight: height }}>
+    <svg width="100%" height={height ?? '100%'} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
       {Array.from({ length: circuit.num_qubits }, (_, q) => (
         <g key={q}>
           <text x={6} y={qy(q) + 4} fontSize="11" fill="#8b97ad" fontFamily="JetBrains Mono">{qubitLabels?.[q] ?? `q${q}`}</text>

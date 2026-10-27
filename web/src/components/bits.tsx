@@ -78,12 +78,12 @@ export function BitRain({ bits, height = 220, speed = 1 }: { bits: number[]; hei
 }
 
 /** Bars for 2^n basis-state amplitudes: height = amplitude (signed), colour = sign/phase. */
-export function AmplitudeBars({ re, n, height = 170, highlightZero = false }: { re: number[]; n: number; height?: number; highlightZero?: boolean }) {
+export function AmplitudeBars({ re, n, height = 170, width = 600, highlightZero = false }: { re: number[]; n: number; height?: number; width?: number; highlightZero?: boolean }) {
   const N = re.length
   const maxAmp = 1
-  const W = 600, H = height, mid = H / 2, bw = W / N
+  const W = width, H = height, mid = (H - 12) / 2, bw = W / N
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
       <line x1={0} x2={W} y1={mid} y2={mid} stroke="rgba(120,160,220,0.35)" />
       {re.map((v, i) => {
         const h = (Math.abs(v) / maxAmp) * (mid - 14)
@@ -95,7 +95,7 @@ export function AmplitudeBars({ re, n, height = 170, highlightZero = false }: { 
               animate={{ y: neg ? mid : mid - h, height: Math.max(h, 0.5), fill: col }}
               transition={{ type: 'spring', stiffness: 120, damping: 18 }}
               style={{ filter: highlightZero && i === 0 ? `drop-shadow(0 0 6px ${col})` : undefined }} />
-            {N <= 32 && (
+            {bw >= 16 && (
               <text x={i * bw + bw / 2} y={H - 2} textAnchor="middle" fontSize={N <= 16 ? 9 : 7} fill={i === 0 ? '#FFB020' : '#56627a'} fontFamily="JetBrains Mono">
                 {i.toString(2).padStart(n, '0')}
               </text>

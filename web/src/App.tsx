@@ -11,6 +11,9 @@ import { Game } from './screens/Game'
 import { Hardware } from './screens/Hardware'
 import { Report } from './screens/Report'
 import { DemoMode } from './demo/DemoMode'
+import { TitleScreen } from './screens/TitleScreen'
+import { Guide, Help } from './components/Guide'
+import { audio } from './lib/audio'
 
 const NAV: { key: Screen; label: string; hotkey: string }[] = [
   { key: 'mission', label: 'Mission', hotkey: '1' },
@@ -59,9 +62,29 @@ function Hud() {
           {low ? 'LOW-PWR' : 'FX ON'}
         </button>
         {demo && <span className="badge" style={{ color: 'var(--magenta)' }}>DEMO</span>}
+        <HudButtons />
       </div>
     </header>
   )
+}
+
+function HudButtons() {
+  const music = useStore((s) => s.music)
+  const st = useStore.getState
+  return (
+    <div className="row" style={{ gap: 4 }}>
+      <button className="icon-btn" title="What am I looking at? (H)" onClick={() => st().setHelp(true)}>?</button>
+      <button className="icon-btn" title="Mission guide (G)" onClick={() => st().setGuide(true)}>GUIDE</button>
+      <button className={`icon-btn ${music ? 'on' : ''}`} title="Music (M)" onClick={() => toggleMusic()}>{music ? '♫' : '♫̸'}</button>
+      <button className="icon-btn" title="Title menu (Esc)" onClick={() => st().setTitle(true)}>MENU</button>
+    </div>
+  )
+}
+
+function toggleMusic() {
+  const s = useStore.getState()
+  s.setMusic(!s.music)
+  if (!s.music) audio.start(); else audio.stop()
 }
 
 function Boot() {
@@ -77,7 +100,7 @@ function Boot() {
       'pool  charging entropy pool from |+⟩ measurements…',
     ]
     script.forEach((l, i) => setTimeout(() => setLines((x) => [...x, l]), 350 * i))
-    api.post<QrngResult>('/api/qrng/generate', { n_bits: 4096, mode: 'sim' }).then((r) => setBits(r.preview)).catch(() => setBits([]))
+    api.post<QrngResult>('/api/qrng/generate', { n_bits: 4096, mode: 'sim' }).then((r) => { setBits(r.preview); audio.setBits(r.preview) }).catch(() => setBits([]))
     const done = setTimeout(() => setBooted(true), 4200)
     const skip = () => setBooted(true)
     window.addEventListener('keydown', skip)
@@ -129,6 +152,15 @@ export default function App() {
   const backendOk = useStore((s) => s.backendOk)
   const scan = useStore((s) => s.scanlines)
   const presenter = useStore((s) => s.presenter)
+  const title = useStore((s) => s.title)
+
+  // music follows the noise slider; browsers only allow audio after a user gesture
+  useEffect(() => useStore.subscribe((st, prev) => { if (st.noise !== prev.noise) audio.setNoise(st.noise) }), [])
+  useEffect(() => {
+    const kick = () => { if (useStore.getState().music && useStore.getState().booted) audio.start() }
+    window.addEventListener('pointerdown', kick)
+    return () => window.removeEventListener('pointerdown', kick)
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -146,9 +178,18 @@ export default function App() {
       if ((e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'SELECT') return
       const s = useStore.getState()
       if (!s.booted) return
+      if (e.key === 'Escape') {
+        if (s.help) s.setHelp(false)
+        else if (!s.guide) s.setTitle(!s.title)
+        return
+      }
+      if (e.key === 'm' || e.key === 'M') { toggleMusic(); return }
+      if (e.key === 'g' || e.key === 'G') { s.setGuide(true); return }
+      if (e.key === 'd' || e.key === 'D') { s.setTitle(false); s.setGuide(false); s.setDemo(!s.demo); return }
+      if (s.title || s.guide) return
+      if (e.key === 'h' || e.key === 'H' || e.key === '?') { s.setHelp(!s.help); return }
       const nav = NAV.find((n) => n.hotkey === e.key)
       if (nav) s.setScreen(nav.key)
-      if (e.key === 'd' || e.key === 'D') s.setDemo(!s.demo)
       if (e.key === 'p' || e.key === 'P') s.togglePresenter()
       if (e.key === 'l' || e.key === 'L') s.toggleLowPower()
       if (e.key === 's' || e.key === 'S') s.toggleScanlines()
@@ -170,6 +211,9 @@ export default function App() {
         {screen === 'report' && <Report />}
       </main>
       <DemoMode />
+      <AnimatePresence>{booted && title && <TitleScreen />}</AnimatePresence>
+      <Guide />
+      <Help />
       <AnimatePresence>{!booted && <Boot />}</AnimatePresence>
       {booted && backendOk === false && <Offline />}
     </div>

@@ -47,3 +47,14 @@
 ## Phase 5 — notebooks
 - `python -m jupyter nbconvert` dispatches to the first `jupyter-nbconvert` on PATH (the system one), so we call
   `python -m nbconvert`. Kernel `qrelay` is installed with `--sys-prefix` (inside .venv only).
+
+## Phase 6 — layout, title screen, guide, music (user request)
+- Every screen is a fixed CSS grid that fills the viewport (`.fit`, min-height 620px, then scroll). Charts are rendered
+  at the exact pixel size of their cell via `<Fill>` (ResizeObserver), so nothing is cut off. Checked at 1900x860 and 1366x680.
+- Title screen (Continue / New Mission / Music / Guide) after the boot sequence; Continue restores the last screen.
+- Mission Guide: 8 plain-language steps with illustrations and "Show me" navigation; opens automatically on the first
+  New Mission. A per-screen "?" help sheet explains each panel in simple words.
+- Music: WebAudio synthesis (pad, bass, plucked arpeggio, delay and reverb), no audio files, offline. Arpeggio notes come
+  from QRNG bits (SIM-labelled bits from the boot fetch). Noise closes a low-pass filter, adds hiss, detunes and drops
+  notes. Event sound effects for classical bits, fidelity below 2/3, and the DJ verdict. Starts only after a user gesture.
+- Teleport Lab ignores stale responses (request id) and shows loading and error states.

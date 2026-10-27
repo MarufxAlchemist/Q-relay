@@ -17,7 +17,9 @@ make setup && make demo
 ```
 Other targets: `test` (53 tests), `dev` (API :8000 + Vite :5173 with hot reload), `precompute` (noise sweeps and comparisons), `notebooks` (regenerate and execute notebooks), `report` (figures), `smoke` (headless UI test). **No internet or IBM account is needed to run the demo.** Cached and emulated results ship in `data/`.
 
-Hotkeys in the app: `1–7` screens · `D` 90-second auto demo · `P` presenter captions · `L` low-power mode.
+The app opens on a **title screen** (Continue / New Mission / Music / Mission Guide). The **Mission Guide** is an 8-step tutorial in plain language, and the **?** button explains the current screen in simple words. Music is generated live in the browser (no audio files): its notes are picked by QRNG bits, and it gets muddier as you raise the noise.
+
+Hotkeys: `1–7` screens · `D` 90-second auto demo · `H` help · `G` guide · `M` music · `Esc` title menu · `P` presenter captions · `L` low-power mode.
 
 ## What's inside
 

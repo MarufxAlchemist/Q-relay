@@ -5,6 +5,7 @@ import { BitRain, Fingerprint } from '../components/bits'
 import { BarChart, LineChart } from '../components/charts'
 import { CircuitView } from '../components/CircuitView'
 import { Seg, SourceBadge } from '../components/controls'
+import { Fill, Panel } from '../components/Fill'
 import { useStore } from '../store/useStore'
 
 type Mode = 'sim' | 'emulated' | 'hw_cached'
@@ -16,6 +17,9 @@ const SHORT: Record<string, string> = {
   'Spectral (DFT)': 'DFT', 'Autocorrelation (lags 1-32)': 'AutoC', 'Byte chi-square': 'Byte χ²',
 }
 
+const shortName = (n: string) => n.replace(' (Aer simulator)', '').replace(' (NumPy)', '').replace('Mersenne Twister', 'MT19937')
+  .replace(' (low byte)', '').replace(/^QRNG \((\w+), (\w+)\)$/, 'QRNG $1').replace(/^This run \(.*\)$/, 'This run').replace(' (live, Break the PRNG)', ' live')
+
 function StatsMatrix({ rows }: { rows: { name: string; source: string; suite: Suite }[] }) {
   if (!rows.length) return null
   const tests = rows[0].suite.tests.map((t) => t.name)
@@ -26,13 +30,13 @@ function StatsMatrix({ rows }: { rows: { name: string; source: string; suite: Su
           <tr>
             <th>generator</th>
             {tests.map((t) => <th key={t} title={t} style={{ textAlign: 'center' }}>{SHORT[t] ?? t}</th>)}
-            <th>pass</th><th>H∞/byte</th>
+            <th>pass</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
             <tr key={r.name}>
-              <td>{r.name} <SourceBadge source={r.source} /></td>
+              <td style={{ whiteSpace: 'nowrap' }}>{shortName(r.name)} <SourceBadge source={r.source} /></td>
               {r.suite.tests.map((t) => (
                 <td key={t.name} title={`${t.name}: p = ${t.p_value?.toExponential(3)}\n${t.detail}`} style={{ textAlign: 'center', padding: 2 }}>
                   <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
@@ -44,13 +48,12 @@ function StatsMatrix({ rows }: { rows: { name: string; source: string; suite: Su
                 </td>
               ))}
               <td className={r.suite.passed === r.suite.total ? 'green' : 'red'}>{r.suite.passed}/{r.suite.total}</td>
-              <td>{r.suite.entropy.min_entropy_per_byte.toFixed(3)}</td>
             </tr>
           ))}
         </tbody>
       </table>
       <div className="tip" style={{ marginTop: 6 }}>
-        NIST SP 800-22 style tests (our own implementation), α = 0.01. Cells show p-values. Passing means a test <i>failed to detect</i> structure. It is not a proof of randomness.
+        Cells = p-values (pass ≥ 0.01). A pass means no pattern was found. It is not proof of randomness.
       </div>
     </div>
   )
@@ -94,102 +97,95 @@ export function QrngLab() {
     ...(broken ? [{ name: 'RANDU (live, Break the PRNG)', source: 'PRNG', suite: broken.suite }] : []),
   ]
 
+  const prints: [string, string, string][] = [
+    ...(res ? [['this run', res.fingerprint, res.source] as [string, string, string]] : []),
+    ...(compare ? Object.entries(compare).map(([k, v]) => [shortName(k), v.fingerprint, v.source] as [string, string, string]) : []),
+    ...(broken ? [['RANDU (live)', broken.fingerprint, 'PRNG'] as [string, string, string]] : []),
+  ]
+
   return (
     <div className="screen">
-      <div className="grid" style={{ gridTemplateColumns: '1.05fr 1fr 1fr', gap: 12 }}>
-        <div className="panel" style={{ gridRow: 'span 2' }}>
-          <h3>Quantum random number generator <span className="grow" />{res && <SourceBadge source={res.source} />}</h3>
-          <BitRain bits={res?.preview ?? []} height={170} />
-          <div className="row" style={{ marginTop: 10 }}>
-            <Seg value={mode} options={['sim', 'emulated', 'hw_cached'] as const} onChange={setMode} labels={{ sim: 'SIM', emulated: 'EMU', hw_cached: 'HW (cached)' }} />
-            <Seg value={mit} options={['none', 'vn', 'xor', 'toeplitz'] as const} onChange={setMit} labels={{ none: 'raw', vn: 'Von Neumann', xor: 'XOR', toeplitz: 'Toeplitz' }} />
+      <div className="fit" style={{
+        gridTemplateColumns: '1fr 1fr 1fr 1.35fr', gridTemplateRows: '1fr 1fr',
+        gridTemplateAreas: '"gen hist walk finger" "gen auto extr matrix"',
+      }}>
+        <Panel title="Quantum random number generator" right={res && <SourceBadge source={res.source} />} style={{ gridArea: 'gen' }}>
+          <div style={{ height: 120, flexShrink: 0 }}><BitRain bits={res?.preview ?? []} height={120} /></div>
+          <div className="row" style={{ marginTop: 6, gap: 6 }}>
+            <Seg value={mode} options={['sim', 'emulated', 'hw_cached'] as const} onChange={setMode} labels={{ sim: 'SIM', emulated: 'EMU', hw_cached: 'HW' }} />
+            <Seg value={mit} options={['none', 'vn', 'xor', 'toeplitz'] as const} onChange={setMit} labels={{ none: 'raw', vn: 'VN', xor: 'XOR', toeplitz: 'Toeplitz' }} />
           </div>
-          <div className="row" style={{ marginTop: 8 }}>
-            <label className="lbl">bits</label>
+          <div className="row" style={{ marginTop: 6, gap: 6 }}>
             <Seg value={nBits} options={[50_000, 200_000, 1_000_000] as const} onChange={setNBits} labels={{ 50000: '50k', 200000: '200k', 1000000: '1M' }} />
-            <button className="btn" onClick={generate} disabled={busy}>{busy ? 'Generating…' : 'Generate'}</button>
+            <button className="btn" onClick={generate} disabled={busy}>{busy ? '…' : 'Generate'}</button>
             <button className="btn red" onClick={breakPrng}>Break the PRNG</button>
           </div>
-          {err && <div className="red mono" style={{ marginTop: 8, fontSize: 12 }}>{err}</div>}
+          {err && <div className="red mono" style={{ marginTop: 4, fontSize: 11 }}>{err}</div>}
           {res && (
-            <dl className="kv" style={{ marginTop: 10 }}>
-              <dt>source</dt><dd className="amber">{res.source_label}</dd>
-              <dt>bits (raw → used)</dt><dd>{res.n_raw.toLocaleString()} → {res.n_bits.toLocaleString()} ({(res.yield * 100).toFixed(1)}%)</dd>
+            <dl className="kv" style={{ marginTop: 6 }}>
+              <dt>source</dt><dd className="amber" style={{ fontSize: 10.5 }}>{res.source_label}</dd>
+              <dt>bits used</dt><dd>{res.n_bits.toLocaleString()} ({(res.yield * 100).toFixed(1)}%)</dd>
               <dt>P(1)</dt><dd>{(res.counts[1] / n).toFixed(5)}</dd>
               <dt>Shannon / bit</dt><dd>{res.suite.entropy.shannon_per_bit.toFixed(6)}</dd>
-              <dt>min-entropy / bit</dt><dd>{res.suite.entropy.min_entropy_per_bit.toFixed(6)}</dd>
-              <dt>min-entropy / byte</dt><dd>{res.suite.entropy.min_entropy_per_byte.toFixed(4)} (max 8)</dd>
+              <dt>min-entropy / byte</dt><dd>{res.suite.entropy.min_entropy_per_byte.toFixed(3)} / 8</dd>
             </dl>
           )}
-          <h3 style={{ marginTop: 14 }}>Circuit: H then measure, one bit per qubit (4-qubit parallel version)</h3>
-          {res && <CircuitView circuit={res.circuit} height={150} />}
-          <div className="honesty" style={{ marginTop: 6 }}>
-            Aer is a classical simulator. Its measurement outcomes come from a classical PRNG. Only HW bits are physically random.
-          </div>
-        </div>
+          <h3 style={{ marginTop: 8 }}>Circuit: H then measure</h3>
+          {res && <Fill minH={60}>{(_, h) => <CircuitView circuit={res.circuit} height={Math.min(h, 150)} />}</Fill>}
+          <div className="honesty">Simulator bits come from a classical PRNG inside Aer. Only HW bits are physically random.</div>
+        </Panel>
 
-        <div className="panel">
-          <h3>0/1 frequency with ±3σ band</h3>
-          {res && (
-            <BarChart labels={['0', '1']} values={res.counts} colors={['#22E4FF', '#FF3DA5']} yMax={n * 0.56}
-              band={{ lo: n / 2 - 3 * sigma, hi: n / 2 + 3 * sigma, color: '#FFB020' }}
-              refLine={{ y: n / 2, label: 'n/2', color: '#FFB020' }} valueFmt={(v) => v.toLocaleString()} height={190} />
-          )}
-          <div className="tip">Band = n/2 ± 3·√(n/4). A fair source lands inside it about 99.7% of the time.</div>
-        </div>
-        <div className="panel">
-          <h3>Random walk (cumulative ±1) vs ±√n envelope</h3>
-          {res && (
-            <LineChart height={190} series={[{ name: 'walk', x: res.walk.x, y: res.walk.walk, color: '#22E4FF', width: 1.3 }]}
-              band={{ x: res.walk.x, lo: res.walk.envelope.map((e) => -3 * e), hi: res.walk.envelope.map((e) => 3 * e), color: '#8B5CF6' }}
-              hLines={[{ y: 0, label: '', color: 'rgba(120,160,220,0.4)' }]} xLabel="bits" />
-          )}
-          <div className="tip">Shaded: ±3√n. A biased source drifts out of the envelope linearly.</div>
-        </div>
-        <div className="panel">
-          <h3>Autocorrelation, lags 1–32</h3>
-          {res && (
-            <LineChart height={170} series={[{ name: 'r(k)', x: res.autocorr.map((_, i) => i + 1), y: res.autocorr, color: '#2EE59D' }]}
-              band={{ x: res.autocorr.map((_, i) => i + 1), lo: res.autocorr.map(() => -3 / Math.sqrt(n)), hi: res.autocorr.map(() => 3 / Math.sqrt(n)), color: '#2EE59D' }}
-              xLabel="lag k" />
-          )}
-        </div>
-        <div className="panel">
-          <h3>Bias mitigation (extractors)</h3>
+        <Panel title="0 / 1 counts with ±3σ band" style={{ gridArea: 'hist' }}>
+          {res && <Fill>{(w, h) => (
+            <BarChart width={w} height={h} labels={['0', '1']} values={res.counts} colors={['#22E4FF', '#FF3DA5']} yMax={n * 0.56}
+              band={{ lo: n / 2 - 3 * sigma, hi: n / 2 + 3 * sigma, color: '#FFB020' }} refLine={{ y: n / 2, label: 'n/2', color: '#FFB020' }} valueFmt={(v) => v.toLocaleString()} />
+          )}</Fill>}
+        </Panel>
+        <Panel title="Random walk vs ±3√n" style={{ gridArea: 'walk' }}>
+          {res && <Fill>{(w, h) => (
+            <LineChart width={w} height={h} series={[{ name: 'walk', x: res.walk.x, y: res.walk.walk, color: '#22E4FF', width: 1.3 }]}
+              band={{ x: res.walk.x, lo: res.walk.envelope.map((e) => -3 * e), hi: res.walk.envelope.map((e) => 3 * e), color: '#8B5CF6' }} xLabel="bits" />
+          )}</Fill>}
+        </Panel>
+        <Panel title="Bit fingerprints (structure = not random)" style={{ gridArea: 'finger' }}>
+          <Fill>{(w, h) => {
+            const cols = prints.length > 6 ? 4 : Math.min(3, prints.length || 1), rows = Math.ceil((prints.length || 1) / cols)
+            const size = Math.max(40, Math.min((w - 10 * cols) / cols, (h - 34 * rows) / rows))
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 4, justifyItems: 'center' }}>
+                {prints.map(([label, b64, src]) => <Fingerprint key={label} b64={b64} label={label} badge={<SourceBadge source={src} />} size={size} />)}
+              </div>
+            )
+          }}</Fill>
+        </Panel>
+        <Panel title="Autocorrelation, lags 1–32" style={{ gridArea: 'auto' }}>
+          {res && <Fill>{(w, h) => (
+            <LineChart width={w} height={h} series={[{ name: 'r(k)', x: res.autocorr.map((_, i) => i + 1), y: res.autocorr, color: '#2EE59D' }]}
+              band={{ x: res.autocorr.map((_, i) => i + 1), lo: res.autocorr.map(() => -3 / Math.sqrt(n)), hi: res.autocorr.map(() => 3 / Math.sqrt(n)), color: '#2EE59D' }} xLabel="lag" />
+          )}</Fill>}
+        </Panel>
+        <Panel title="Bias fixing (extractors)" style={{ gridArea: 'extr' }}>
           {extractors ? (
-            <>
-              <div className="tip" style={{ marginBottom: 6 }}>{extractors.source_description}</div>
-              <table className="t">
+            <div className="scroll-y">
+              <div className="tip">{extractors.source_description}</div>
+              <table className="t" style={{ marginTop: 4 }}>
                 <thead><tr><th>method</th><th>P(1)</th><th>yield</th><th>tests</th></tr></thead>
                 <tbody>
                   {Object.entries(extractors.methods).map(([k, v]: [string, any]) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                     <tr key={k}>
-                      <td>{k}</td><td>{v.p1.toFixed(4)}</td><td>{(v.yield * 100).toFixed(1)}%</td>
+                      <td>{k}</td><td>{v.p1.toFixed(4)}</td><td>{(v.yield * 100).toFixed(0)}%</td>
                       <td className={v.suite?.passed === v.suite?.total ? 'green' : 'red'}>{v.suite ? `${v.suite.passed}/${v.suite.total}` : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="tip" style={{ marginTop: 6 }}>
-                VN is exactly unbiased for i.i.d. bits but keeps only p(1−p) per bit. XOR shrinks bias ε to 2ε². Toeplitz hashing keeps ≈ H∞ − 2·log(1/ε) bits per block.
-              </div>
-            </>
-          ) : <div className="tip">Run <span className="mono">python scripts/precompute_sweeps.py</span> to populate.</div>}
-        </div>
-      </div>
-
-      <div className="panel" style={{ marginTop: 12 }}>
-        <h3>Bit fingerprints: 65,536 bits as a 256×256 bitmap <span className="grow" /><span className="tip">structure = non-randomness</span></h3>
-        <div className="row" style={{ gap: 18, justifyContent: 'space-around' }}>
-          {res && <Fingerprint b64={res.fingerprint} label="this run" badge={<SourceBadge source={res.source} />} size={170} />}
-          {compare && Object.entries(compare).map(([k, v]) => <Fingerprint key={k} b64={v.fingerprint} label={k} badge={<SourceBadge source={v.source} />} size={170} />)}
-          {broken && <Fingerprint b64={broken.fingerprint} label="RANDU (live)" badge={<SourceBadge source="PRNG" />} size={170} />}
-        </div>
-      </div>
-
-      <div className="panel" style={{ marginTop: 12 }}>
-        <h3>Statistical test matrix: QRNG vs classical PRNGs</h3>
-        <StatsMatrix rows={rows} />
+              <div className="tip" style={{ marginTop: 4 }}>VN: exact but wasteful. XOR: cheap, bias only shrinks. Toeplitz: keeps the most bits, provably.</div>
+            </div>
+          ) : <div className="tip">Run scripts/precompute_sweeps.py to populate.</div>}
+        </Panel>
+        <Panel title="Statistical tests: QRNG vs classical" style={{ gridArea: 'matrix' }}>
+          <div className="scroll-y"><StatsMatrix rows={rows} /></div>
+        </Panel>
       </div>
     </div>
   )

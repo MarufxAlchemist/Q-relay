@@ -22,18 +22,31 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--url", default="http://127.0.0.1:8000")
     ap.add_argument("--mission", action="store_true", help="also run a full mission and screenshot the end state")
+    ap.add_argument("--width", type=int, default=1900)
+    ap.add_argument("--height", type=int, default=860)
     a = ap.parse_args()
     SHOTS.mkdir(parents=True, exist_ok=True)
     errors: list[str] = []
     with sync_playwright() as p:
         browser = p.chromium.launch(channel="msedge", headless=True, args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
-        page = browser.new_page(viewport={"width": 1600, "height": 900})
+        page = browser.new_page(viewport={"width": a.width, "height": a.height})
         page.on("console", lambda m: errors.append(f"[{m.type}] {m.text}") if m.type == "error" else None)
         page.on("pageerror", lambda e: errors.append(f"[pageerror] {e}"))
         page.goto(a.url)
         page.wait_for_timeout(1500)
         page.keyboard.press("Space")  # skip boot
-        page.wait_for_timeout(1500)
+        page.wait_for_timeout(2500)
+        page.screenshot(path=str(SHOTS / "title.png"))
+        page.get_by_text("NEW MISSION").click()  # first visit opens the guide
+        page.wait_for_timeout(1200)
+        page.screenshot(path=str(SHOTS / "guide.png"))
+        page.get_by_text("Skip").click()
+        page.wait_for_timeout(800)
+        page.keyboard.press("h")
+        page.wait_for_timeout(700)
+        page.screenshot(path=str(SHOTS / "help.png"))
+        page.keyboard.press("Escape")
+        page.wait_for_timeout(500)
         for key, name in SCREENS:
             page.keyboard.press(key)
             page.wait_for_timeout(4500 if name in ("qrng", "dj", "teleport") else 2500)

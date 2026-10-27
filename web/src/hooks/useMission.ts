@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useStore, type MissionEvent } from '../store/useStore'
 import { api, wsUrl, type TeleportResult, type Vec3 } from '../lib/api'
+import { audio } from '../lib/audio'
 
 const Z: Vec3 = [0, 0, 1]
 let socket: WebSocket | null = null
@@ -12,7 +13,9 @@ function handle(ev: MissionEvent) {
   const d = ev.data
   if (ev.type === 'state_drawn') s.setLive({ bloch: [d.bloch, Z, Z], ghost: d.bloch, fidelity: null })
   if (d.bloch && ev.stage === 'teleport' && Array.isArray(d.bloch[0])) s.setLive({ bloch: d.bloch })
-  if (ev.type === 'fidelity') s.setLive({ fidelity: d.exact })
+  if (ev.type === 'fidelity') { s.setLive({ fidelity: d.exact }); if (!d.quantum_regime) audio.sfx('fail') }
+  if (ev.type === 'classical_bits_sent') audio.sfx('whoosh')
+  if (ev.type === 'verdict') audio.sfx(d.correct ? 'success' : 'fail')
   if (ev.type === 'mission_summary') s.setMissionRunning(false)
 }
 
