@@ -112,7 +112,7 @@ export function TruthTiles({ table, n, revealed, onTile, size = 30 }: {
   table: (number | null)[]; n: number; revealed?: boolean; onTile?: (x: number) => void; size?: number
 }) {
   const N = table.length
-  const cols = Math.min(16, Math.ceil(Math.sqrt(N) * (N > 16 ? 2 : 1)))
+  const cols = Math.min(16, 2 ** Math.ceil(Math.log2(N) / 2))
   return (
     <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, ${size}px)`, gap: 4 }}>
       {table.map((v, x) => {

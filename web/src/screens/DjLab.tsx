@@ -179,7 +179,7 @@ export function DjLab() {
         <div className="panel">
           <h3>Query complexity (log scale)</h3>
           {complexity && (
-            <LineChart height={230} logY xLabel="input bits n" yLabel="oracle queries"
+            <LineChart height={230} logY legendPos="br" xLabel="input bits n" yLabel="oracle queries"
               series={[
                 { name: 'classical deterministic 2^(n−1)+1', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map((r: any) => r.classical_worst), color: '#FF3DA5' },
                 { name: 'adversary simulation', x: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.n), y: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.adversary), color: '#FFB020', dashed: true },
@@ -191,7 +191,7 @@ export function DjLab() {
         <div className="panel">
           <h3>Success vs noise, n = {Math.min(Math.max(n, 2), 6)} <span className="grow" /><SourceBadge source="SIM" /></h3>
           {nd && noiseData && (
-            <LineChart height={230} yMin={0} yMax={1} xLabel="2-qubit depolarizing p₂ (p₁ = p₂/10)" yLabel="P(correct)"
+            <LineChart height={230} yMin={0} yMax={1} legendPos="bl" xLabel="2-qubit depolarizing p₂ (p₁ = p₂/10)" yLabel="P(correct)"
               series={Object.entries(nd).map(([k, v]: [string, any], i) => ({
                 name: `${k} (${v.cx} CX)`, x: noiseData.levels_p2, y: v.success,
                 color: ['#22E4FF', '#5ab8ff', '#FF3DA5', '#8B5CF6', '#FFB020', '#2EE59D'][i % 6], dashed: v.kind === 'constant',

@@ -78,7 +78,7 @@ def read_sweep(name: str) -> dict:
     p = SWEEPS / f"{name}.json"
     if not p.exists():
         raise HTTPException(404, f"{name} not precomputed — run `python scripts/precompute_sweeps.py`")
-    return json.loads(p.read_text())
+    return jsonable(json.loads(p.read_text()))  # files may contain NaN (e.g. a skipped statistic)
 
 
 def circuit_json(qc) -> dict:

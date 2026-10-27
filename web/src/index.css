@@ -134,7 +134,7 @@ input[type='range']::-webkit-slider-thumb {
   mix-blend-mode: overlay;
 }
 .caption-bar {
-  position: absolute; left: 50%; transform: translateX(-50%); bottom: 18px; max-width: 980px; width: calc(100% - 40px);
+  position: absolute; left: 0; right: 0; margin: 0 auto; bottom: 18px; max-width: 980px; width: calc(100% - 40px);
   text-align: center; font-size: 17px; line-height: 1.45; padding: 10px 18px; background: rgba(5, 6, 10, 0.72);
   border: 1px solid var(--line); border-radius: 6px; z-index: 5;
 }

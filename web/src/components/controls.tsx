@@ -46,18 +46,18 @@ export function FidelityGauge({ value, size = 150, label = 'Fidelity' }: { value
   return (
     <div style={{ position: 'relative', width: size, height: size }}>
       <svg width={size} height={size}>
-        <path d={arc(0, 1)} stroke="rgba(120,160,220,0.18)" strokeWidth={9} fill="none" strokeLinecap="round" />
-        <path d={arc(0, toF(CLASSICAL_BOUND))} stroke="rgba(255,77,94,0.25)" strokeWidth={9} fill="none" />
-        <motion.path d={arc(0, Math.max(0.001, toF(v)))} stroke={col} strokeWidth={9} fill="none" strokeLinecap="round"
-          style={{ filter: `drop-shadow(0 0 6px ${col})` }} initial={false} animate={{ d: arc(0, Math.max(0.001, toF(v))) }} />
+        <path d={arc(0, 1)} stroke="rgba(120,160,220,0.18)" strokeWidth={size < 60 ? 5 : 9} fill="none" strokeLinecap="round" />
+        <path d={arc(0, toF(CLASSICAL_BOUND))} stroke="rgba(255,77,94,0.25)" strokeWidth={size < 60 ? 5 : 9} fill="none" />
+        <path d={arc(0, Math.max(0.001, toF(v)))} stroke={col} strokeWidth={size < 60 ? 5 : 9} fill="none" strokeLinecap="round"
+          style={{ filter: `drop-shadow(0 0 6px ${col})` }} />
         <line x1={bx} y1={by} x2={size / 2 + (bx - size / 2) * 0.72} y2={size / 2 + (by - size / 2) * 0.72} stroke="#FFB020" strokeWidth={2} />
-        <text x={size / 2 + (bx - size / 2) * 0.6} y={size / 2 + (by - size / 2) * 0.6 + 3} fontSize="9" fill="#FFB020" textAnchor="middle" fontFamily="JetBrains Mono">2/3</text>
+        {size >= 60 && <text x={size / 2 + (bx - size / 2) * 0.6} y={size / 2 + (by - size / 2) * 0.6 + 3} fontSize="9" fill="#FFB020" textAnchor="middle" fontFamily="JetBrains Mono">2/3</text>}
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
         <div>
           <div className="mono" style={{ fontSize: size / 5.2, color: col, textShadow: `0 0 12px ${col}` }}>{value === null ? '—' : value.toFixed(3)}</div>
-          <div className="lbl" style={{ fontSize: 9 }}>{label}</div>
-          {value !== null && (
+          {size >= 60 && <div className="lbl" style={{ fontSize: 9 }}>{label}</div>}
+          {value !== null && size >= 60 && (
             <div className="mono" style={{ fontSize: 9, color: quantum ? 'var(--green)' : 'var(--red)', marginTop: 2 }}>
               {quantum ? 'QUANTUM REGIME' : 'CLASSICAL REGIME'}
             </div>

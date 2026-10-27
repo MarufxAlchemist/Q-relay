@@ -35,7 +35,7 @@ export function MissionScene({ beamActive, classicalBits, classicalAt }: {
         <BlochSphere vector={b[1]} color="#8B5CF6" position={[-1.75, 0.25, 0]} scale={0.62} showLabels={false} label="q1" trail={false} dim />
         <BlochSphere vector={b[2]} color="#FF3DA5" position={[4.1, 0.25, 0]} scale={1.15} ghost={ghost} label="BOB · q2" />
         <EntanglementBeam from={[-1.05, 0.25, 0]} to={[2.85, 0.25, 0]} coherence={1 - noise} active={beamActive} />
-        <ClassicalWire from={[-4.1, -1.75, 0]} to={[4.1, -1.75, 0]} bits={classicalBits} startedAt={classicalAt} />
+        <ClassicalWire from={[-4.1, -2.45, 0]} to={[4.1, -2.45, 0]} bits={classicalBits} startedAt={classicalAt} />
       </Suspense>
       <Effects />
     </Canvas>

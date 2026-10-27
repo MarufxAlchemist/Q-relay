@@ -17,6 +17,7 @@ interface LineProps {
   markers?: { x: number; y: number; label: string; color: string }[]
   band?: { x: number[]; lo: number[]; hi: number[]; color: string }
   legend?: boolean
+  legendPos?: 'tl' | 'tr' | 'bl' | 'br'
   vLine?: { x: number; color: string; label?: string }
 }
 
@@ -34,7 +35,7 @@ function ticks(min: number, max: number, n = 5): number[] {
 
 const fmt = (v: number) => (Math.abs(v) >= 10000 ? v.toExponential(0) : Math.abs(v) < 0.01 && v !== 0 ? v.toExponential(0) : +v.toFixed(3) + '')
 
-export function LineChart({ series, width = 460, height = 220, xLabel, yLabel, yMin, yMax, logY, hLines, markers, band, legend = true, vLine }: LineProps) {
+export function LineChart({ series, width = 460, height = 220, xLabel, yLabel, yMin, yMax, logY, hLines, markers, band, legend = true, legendPos = 'tl', vLine }: LineProps) {
   const all = series.flatMap((s) => s.x.map((x, i) => [x, s.y[i]] as const)).filter(([, y]) => y != null && isFinite(y))
   const xs = all.map((p) => p[0]), ys = all.map((p) => p[1])
   if (band) ys.push(...band.lo, ...band.hi)
@@ -89,7 +90,7 @@ export function LineChart({ series, width = 460, height = 220, xLabel, yLabel, y
       {legend && series.length > 1 && (
         <g>
           {series.map((s, i) => (
-            <g key={s.name} transform={`translate(${M.l + 8},${M.t + 8 + i * 13})`}>
+            <g key={s.name} transform={`translate(${legendPos.endsWith('r') ? width - M.r - 190 : M.l + 8},${legendPos.startsWith('b') ? M.t + H - 8 - (series.length - 1 - i) * 13 : M.t + 8 + i * 13})`}>
               <line x1={0} x2={14} y1={0} y2={0} stroke={s.color} strokeWidth={2} strokeDasharray={s.dashed ? '4 3' : undefined} />
               <text x={19} y={3} fontSize="9.5" fill="#c9d3e6">{s.name}</text>
             </g>

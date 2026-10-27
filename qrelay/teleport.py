@@ -198,25 +198,37 @@ def run_tomography(theta: float, phi: float, noise: NoiseSpec | None = None, sho
         if A is not None:
             r_mit.append(expectation_from_counts(mitigate_counts(bob, A)))
     r_in = bloch_of(theta, phi)
+    r_phys = project_to_ball(r_out)
     out = {
         "r_in": r_in.tolist(),
-        "r_out": r_out,
-        "fidelity": float((1 + np.dot(r_in, r_out)) / 2),
+        "r_out": r_phys.tolist(),
+        "r_out_raw": r_out,
+        "fidelity": float((1 + np.dot(r_in, r_phys)) / 2),
         "counts": raw_counts,
         "shots": shots,
     }
     if A is not None:
-        out["r_mitigated"] = r_mit
-        out["fidelity_mitigated"] = float((1 + np.dot(r_in, r_mit)) / 2)
+        r_mit_phys = project_to_ball(r_mit)
+        out["r_mitigated"] = r_mit_phys.tolist()
+        out["fidelity_mitigated"] = float((1 + np.dot(r_in, r_mit_phys)) / 2)
         out["confusion"] = A.tolist()
     return out
 
 
+def project_to_ball(r) -> np.ndarray:
+    """Finite-shot estimates can give |r| > 1 (an unphysical state); project onto the Bloch ball (|r| <= 1)."""
+    r = np.asarray(r, dtype=float)
+    n = np.linalg.norm(r)
+    return r / n if n > 1 else r
+
+
 def tomography_fidelity_from_counts(theta: float, phi: float, counts_by_basis: dict[str, dict[str, int]]) -> dict:
     """Same reconstruction as :func:`run_tomography`, from externally obtained (e.g. hardware) counts."""
-    r_out = [expectation_from_counts(counts_by_basis[b]) for b in ("X", "Y", "Z")]
+    r_raw = [expectation_from_counts(counts_by_basis[b]) for b in ("X", "Y", "Z")]
+    r_out = project_to_ball(r_raw)
     r_in = bloch_of(theta, phi)
-    return {"r_in": r_in.tolist(), "r_out": r_out, "fidelity": float((1 + np.dot(r_in, r_out)) / 2)}
+    return {"r_in": r_in.tolist(), "r_out": r_out.tolist(), "r_out_raw": r_raw,
+            "fidelity": float((1 + np.dot(r_in, r_out)) / 2)}
 
 
 # ------------------------------------------------------------------ process characterisation

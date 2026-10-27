@@ -60,18 +60,23 @@ export function useLiveRerun() {
   const running = useStore((s) => s.missionRunning)
   const events = useStore((s) => s.events)
   const timer = useRef<number | undefined>(undefined)
+  const endNoise = useRef<number | null>(null)
   const drawn = events.find((e) => e.type === 'state_drawn')
-  const done = events.some((e) => e.type === 'mission_summary')
+  const summary = events.find((e) => e.type === 'mission_summary')
+  useEffect(() => { endNoise.current = summary ? summary.data.noise_level : null }, [summary])
   useEffect(() => {
-    if (running || !drawn || !done) return
+    // only react to slider moves made after the mission ended, never to the completion itself
+    if (running || !drawn || !summary || endNoise.current === null || noise === endNoise.current) return
     window.clearTimeout(timer.current)
     timer.current = window.setTimeout(async () => {
       try {
         const r = await api.post<TeleportResult>('/api/teleport/run', { theta: drawn.data.theta, phi: drawn.data.phi, noise: { level: noise }, shots: 512 })
-        const last = r.steps[r.steps.length - 1]
-        useStore.getState().setLive({ bloch: last.bloch as [Vec3, Vec3, Vec3], fidelity: r.exact.fidelity })
+        const bob = r.steps[r.steps.length - 1].bloch[2]
+        // Keep Alice's qubits from the mission's own branch; Bob's corrected state is branch-independent.
+        const cur = useStore.getState().bloch
+        useStore.getState().setLive({ bloch: [cur[0], cur[1], bob as Vec3], fidelity: r.exact.fidelity })
       } catch { /* backend offline overlay handles it */ }
     }, 220)
     return () => window.clearTimeout(timer.current)
-  }, [noise, running, drawn, done])
+  }, [noise, running, drawn, summary])
 }

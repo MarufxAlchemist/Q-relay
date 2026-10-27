@@ -1,11 +1,42 @@
 import { useMemo, useRef } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
-import { Html, Line } from '@react-three/drei'
+import { Line } from '@react-three/drei'
 import * as THREE from 'three'
 import type { Vec3 } from '../lib/api'
 import { toThree } from '../lib/three'
 
 const UP = new THREE.Vector3(0, 1, 0)
+const labelCache = new Map<string, { tex: THREE.CanvasTexture; aspect: number }>()
+
+/** Text rendered once to a canvas texture and shown as a sprite (no DOM overlays inside the WebGL scene). */
+function TextSprite({ text, position, height = 0.17, color = 'rgba(201,211,230,0.75)', font = 'JetBrains Mono' }: {
+  text: string; position: [number, number, number]; height?: number; color?: string; font?: string
+}) {
+  const key = `${text}|${color}|${font}`
+  let entry = labelCache.get(key)
+  if (!entry) {
+    const c = document.createElement('canvas')
+    const ctx = c.getContext('2d')!
+    const px = 64
+    ctx.font = `${px}px ${font}, monospace`
+    const w = Math.ceil(ctx.measureText(text).width) + 16
+    c.width = w; c.height = px + 20
+    ctx.font = `${px}px ${font}, monospace`
+    ctx.fillStyle = color
+    ctx.textBaseline = 'middle'
+    ctx.fillText(text, 8, c.height / 2)
+    const tex = new THREE.CanvasTexture(c)
+    tex.colorSpace = THREE.SRGBColorSpace
+    tex.anisotropy = 4
+    entry = { tex, aspect: c.width / c.height }
+    labelCache.set(key, entry)
+  }
+  return (
+    <sprite position={position} scale={[height * entry.aspect, height, 1]}>
+      <spriteMaterial map={entry.tex} transparent depthWrite={false} toneMapped={false} />
+    </sprite>
+  )
+}
 const TRAIL = 60
 
 const shellVertex = /* glsl */ `
@@ -172,14 +203,14 @@ export function BlochSphere({ vector, color = '#22E4FF', ghost, label, position 
       )}
       {showLabels && (
         <>
-          <Html position={[0, 1.32, 0]} center className="bloch-label">|0⟩</Html>
-          <Html position={[0, -1.32, 0]} center className="bloch-label">|1⟩</Html>
-          <Html position={[1.3, 0, 0]} center className="bloch-label">|+⟩</Html>
-          <Html position={[-1.3, 0, 0]} center className="bloch-label">|−⟩</Html>
-          <Html position={[0, 0, -1.3]} center className="bloch-label">|+i⟩</Html>
+          <TextSprite text="|0⟩" position={[0, 1.3, 0]} />
+          <TextSprite text="|1⟩" position={[0, -1.3, 0]} />
+          <TextSprite text="|+⟩" position={[1.32, 0, 0]} />
+          <TextSprite text="|−⟩" position={[-1.32, 0, 0]} />
+          <TextSprite text="|+i⟩" position={[0, 0.08, -1.3]} height={0.13} color="rgba(201,211,230,0.4)" />
         </>
       )}
-      {label && <Html position={[0, -1.75, 0]} center className="bloch-title">{label}</Html>}
+      {label && <TextSprite text={label} position={[0, -1.72, 0]} height={0.2} color="rgba(139,151,173,0.95)" font="Space Grotesk" />}
     </group>
   )
 }

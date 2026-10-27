@@ -127,7 +127,7 @@ export function TeleportLab() {
         <div className="panel">
           <h3>Average fidelity vs depolarizing noise <span className="grow" /><SourceBadge source="SIM" /></h3>
           {sw1 && (
-            <LineChart height={240} yMin={0.5} yMax={1} xLabel="2-qubit depolarizing p₂" yLabel="average fidelity"
+            <LineChart height={240} yMin={0.5} yMax={1} legendPos="tr" xLabel="2-qubit depolarizing p₂" yLabel="average fidelity"
               series={[
                 ...Object.entries(sw1.curves).map(([k, v], i) => ({ name: k, x: sw1.p2, y: v as number[], color: SERIES_COLORS[i] })),
                 { name: 'analytic (CX-only)', x: sw1.p2, y: sw1.analytic_cx_only, color: '#ffffff', dashed: true, width: 1 },
