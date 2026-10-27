@@ -65,11 +65,12 @@ def main() -> None:
     a = ap.parse_args()
 
     if a.emulate:
-        from qrelay.backends import fake_backend
+        from qrelay.backends import emulated_simulator, fake_backend
         be = fake_backend()
         exps = hardware.build_experiments(min(a.qrng_qubits, 20), include_dynamic=supports_dynamic(be))
         print(f"emulating {len(exps)} circuits on {be.name} (local Aer + device noise model)")
-        rec = hardware.run_batch(be, be, "EMU", a.shots, a.qrng_shots, exps)
+        # Passing the fake backend itself as the mode rebuilds a simulator per circuit (very slow); reuse one.
+        rec = hardware.run_batch(be, emulated_simulator(), "EMU", a.shots, a.qrng_shots, exps)
         print("saved", hardware.save_record(rec, "emu_batch"))
         return
 
