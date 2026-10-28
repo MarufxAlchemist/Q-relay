@@ -33,10 +33,10 @@ export function angleBetween(a: Vec3, b: Vec3): number {
 }
 
 export const COLORS = {
-  cyan: new THREE.Color('#22E4FF'),
-  magenta: new THREE.Color('#FF3DA5'),
-  violet: new THREE.Color('#8B5CF6'),
-  amber: new THREE.Color('#FFB020'),
-  green: new THREE.Color('#2EE59D'),
-  red: new THREE.Color('#FF4D5E'),
+  cyan: new THREE.Color('#4DFFA6'),
+  magenta: new THREE.Color('#F5C84B'),
+  violet: new THREE.Color('#8F7CFF'),
+  amber: new THREE.Color('#FF8A5B'),
+  green: new THREE.Color('#B6FF6A'),
+  red: new THREE.Color('#FF5470'),
 }

@@ -74,6 +74,8 @@ or set the environment variables `QISKIT_IBM_TOKEN` and `QISKIT_IBM_INSTANCE`. T
 .venv\Scripts\python scripts\run_hardware.py --submit      # one job: QRNG + teleport tomography + DJ + distributed DJ
 .venv\Scripts\python scripts\precompute_sweeps.py --only qrng_compare extractors   # fold HW bits into comparisons
 ```
+**Already run:** IBM `ibm_marrakesh`, job `dbgnmpote5oc738iia1g` (2026-10-28, 55 s QPU). Teleportation F_avg = 0.978 (deferred) and 0.880 (dynamic), DJ 10/10 correct, 819,200 hardware random bits.
+
 Results land in `data/hardware/hw_batch_*.json` with backend, job ID, timestamp, transpiled depth and 2-qubit gate counts, and versions. The app and notebooks pick them up automatically, labelled **HW**.
 
 ## Honesty notes

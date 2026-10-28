@@ -1,32 +1,13 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { motion } from 'framer-motion'
-import * as THREE from 'three'
 import { BlochSphere } from '../scenes/BlochSphere'
 import { EntanglementBeam } from '../scenes/Beam'
 import { Effects } from '../scenes/MissionScene'
+import { Stars } from '../scenes/Stars'
 import { useStore, save } from '../store/useStore'
 import { audio } from '../lib/audio'
 import type { Vec3 } from '../lib/api'
-
-function Stars() {
-  const ref = useRef<THREE.Points>(null)
-  const geom = useMemo(() => {
-    const g = new THREE.BufferGeometry()
-    const p = new Float32Array(1800 * 3)
-    for (let i = 0; i < p.length; i += 3) {
-      p[i] = (Math.random() - 0.5) * 40; p[i + 1] = (Math.random() - 0.5) * 22; p[i + 2] = -Math.random() * 25 - 3
-    }
-    g.setAttribute('position', new THREE.BufferAttribute(p, 3))
-    return g
-  }, [])
-  useFrame((_, dt) => { if (ref.current) ref.current.rotation.z += dt * 0.01 })
-  return (
-    <points ref={ref} geometry={geom}>
-      <pointsMaterial size={0.06} color="#9fb6ff" transparent opacity={0.8} sizeAttenuation />
-    </points>
-  )
-}
 
 /** Two Bloch spheres whose arrows slowly precess (the hero art). */
 function Spinners() {
@@ -43,8 +24,8 @@ function Spinners() {
   })
   return (
     <>
-      <BlochSphere vector={v[0]} color="#22E4FF" position={[-3.4, -0.75, 0]} scale={1.15} label="ALICE" />
-      <BlochSphere vector={v[1]} color="#FF3DA5" position={[3.4, -0.75, 0]} scale={1.15} label="BOB" />
+      <BlochSphere vector={v[0]} color="#4DFFA6" position={[-3.4, -0.75, 0]} scale={1.15} label="ALICE" />
+      <BlochSphere vector={v[1]} color="#F5C84B" position={[3.4, -0.75, 0]} scale={1.15} label="BOB" />
       <EntanglementBeam from={[-2.2, -0.75, 0]} to={[2.2, -0.75, 0]} coherence={0.95} active={1} />
     </>
   )
@@ -55,22 +36,22 @@ function Emblem() {
     <div style={{ display: 'grid', justifyItems: 'center', gap: 6 }}>
       <svg width="150" height="150" viewBox="-80 -80 160 160">
         <defs>
-          <radialGradient id="eg"><stop offset="0" stopColor="#22E4FF" stopOpacity="0.18" /><stop offset="1" stopColor="#22E4FF" stopOpacity="0" /></radialGradient>
+          <radialGradient id="eg"><stop offset="0" stopColor="#4DFFA6" stopOpacity="0.18" /><stop offset="1" stopColor="#4DFFA6" stopOpacity="0" /></radialGradient>
         </defs>
-        <circle r="66" fill="url(#eg)" stroke="#2b5d6e" strokeWidth="2" />
-        <ellipse rx="66" ry="20" fill="none" stroke="#2b5d6e" strokeWidth="1.5" />
-        <ellipse rx="20" ry="66" fill="none" stroke="#2b5d6e" strokeWidth="1.2">
+        <circle r="66" fill="url(#eg)" stroke="#2B6E4F" strokeWidth="2" />
+        <ellipse rx="66" ry="20" fill="none" stroke="#2B6E4F" strokeWidth="1.5" />
+        <ellipse rx="20" ry="66" fill="none" stroke="#2B6E4F" strokeWidth="1.2">
           <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="18s" repeatCount="indefinite" />
         </ellipse>
-        <line x1="0" y1="-74" x2="0" y2="74" stroke="#2b5d6e" strokeWidth="1" />
+        <line x1="0" y1="-74" x2="0" y2="74" stroke="#2B6E4F" strokeWidth="1" />
         <g>
           <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite" />
-          <line x1="0" y1="0" x2="34" y2="-40" stroke="#FFB020" strokeWidth="4" strokeLinecap="round" />
+          <line x1="0" y1="0" x2="34" y2="-40" stroke="#FF8A5B" strokeWidth="4" strokeLinecap="round" />
           <circle cx="34" cy="-40" r="6" fill="#FFE2A0" />
         </g>
-        <circle r="4" fill="#FFB020" />
+        <circle r="4" fill="#FF8A5B" />
       </svg>
-      <div className="mono" style={{ fontSize: 11, letterSpacing: '0.2em', color: '#6f8fa0' }}>QISKIT FALL FEST 2026 · DBATU</div>
+      <div className="mono" style={{ fontSize: 11, letterSpacing: '0.2em', color: '#6FA08A' }}>QISKIT FALL FEST 2026 · DBATU</div>
     </div>
   )
 }
@@ -102,7 +83,7 @@ export function TitleScreen() {
       <div className="title-frame">
         <i className="rivet tl" /><i className="rivet tr" /><i className="rivet bl" /><i className="rivet br" />
         <Canvas dpr={low ? 1 : [1, 2]} camera={{ position: [0, 0.2, 9], fov: 40 }}>
-          <color attach="background" args={['#04060c']} />
+          <color attach="background" args={['#020604']} />
           <ambientLight intensity={0.5} />
           <Stars />
           <Spinners />

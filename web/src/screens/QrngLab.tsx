@@ -6,6 +6,8 @@ import { BarChart, LineChart } from '../components/charts'
 import { CircuitView } from '../components/CircuitView'
 import { Seg, SourceBadge } from '../components/controls'
 import { Fill, Panel } from '../components/Fill'
+import { LabShell } from '../components/Story'
+import { QrngStory } from './QrngStory'
 import { useStore } from '../store/useStore'
 
 type Mode = 'sim' | 'emulated' | 'hw_cached'
@@ -17,10 +19,10 @@ const SHORT: Record<string, string> = {
   'Spectral (DFT)': 'DFT', 'Autocorrelation (lags 1-32)': 'AutoC', 'Byte chi-square': 'Byte χ²',
 }
 
-const shortName = (n: string) => n.replace(' (Aer simulator)', '').replace(' (NumPy)', '').replace('Mersenne Twister', 'MT19937')
+export const shortName = (n: string) => n.replace(' (Aer simulator)', '').replace(' (NumPy)', '').replace('Mersenne Twister', 'MT19937')
   .replace(' (low byte)', '').replace(/^QRNG \((\w+), (\w+)\)$/, 'QRNG $1').replace(/^This run \(.*\)$/, 'This run').replace(' (live, Break the PRNG)', ' live')
 
-function StatsMatrix({ rows }: { rows: { name: string; source: string; suite: Suite }[] }) {
+export function StatsMatrix({ rows, stagger = 0 }: { rows: { name: string; source: string; suite: Suite }[]; stagger?: number }) {
   if (!rows.length) return null
   const tests = rows[0].suite.tests.map((t) => t.name)
   return (
@@ -34,15 +36,15 @@ function StatsMatrix({ rows }: { rows: { name: string; source: string; suite: Su
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
+          {rows.map((r, ri) => (
             <tr key={r.name}>
               <td style={{ whiteSpace: 'nowrap' }}>{shortName(r.name)} <SourceBadge source={r.source} /></td>
-              {r.suite.tests.map((t) => (
+              {r.suite.tests.map((t, ci) => (
                 <td key={t.name} title={`${t.name}: p = ${t.p_value?.toExponential(3)}\n${t.detail}`} style={{ textAlign: 'center', padding: 2 }}>
-                  <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: (ri * r.suite.tests.length + ci) * stagger }}
                     style={{ borderRadius: 3, padding: '3px 0', fontSize: 10,
-                      background: t.passed ? 'rgba(46,229,157,0.16)' : 'rgba(255,77,94,0.3)',
-                      color: t.passed ? 'var(--green)' : 'var(--red)', border: `1px solid ${t.passed ? 'rgba(46,229,157,0.35)' : 'var(--red)'}` }}>
+                      background: t.passed ? 'rgba(182, 255, 106,0.16)' : 'rgba(255, 84, 112,0.3)',
+                      color: t.passed ? 'var(--green)' : 'var(--red)', border: `1px solid ${t.passed ? 'rgba(182, 255, 106,0.35)' : 'var(--red)'}` }}>
                     {t.p_value === null ? '—' : t.p_value < 0.0001 ? '<1e-4' : t.p_value.toFixed(3)}
                   </motion.div>
                 </td>
@@ -59,7 +61,7 @@ function StatsMatrix({ rows }: { rows: { name: string; source: string; suite: Su
   )
 }
 
-export function QrngLab() {
+function QrngOverview() {
   const globalMode = useStore((s) => s.mode)
   const breakTick = useStore((s) => s.tick['qrng.break'] ?? 0)
   const [mode, setMode] = useState<Mode>(globalMode === 'HW' ? 'hw_cached' : globalMode === 'EMU' ? 'emulated' : 'sim')
@@ -104,7 +106,7 @@ export function QrngLab() {
   ]
 
   return (
-    <div className="screen">
+    <div style={{ height: '100%' }}>
       <div className="fit" style={{
         gridTemplateColumns: '1fr 1fr 1fr 1.35fr', gridTemplateRows: '1fr 1fr',
         gridTemplateAreas: '"gen hist walk finger" "gen auto extr matrix"',
@@ -137,14 +139,14 @@ export function QrngLab() {
 
         <Panel title="0 / 1 counts with ±3σ band" style={{ gridArea: 'hist' }}>
           {res && <Fill>{(w, h) => (
-            <BarChart width={w} height={h} labels={['0', '1']} values={res.counts} colors={['#22E4FF', '#FF3DA5']} yMax={n * 0.56}
-              band={{ lo: n / 2 - 3 * sigma, hi: n / 2 + 3 * sigma, color: '#FFB020' }} refLine={{ y: n / 2, label: 'n/2', color: '#FFB020' }} valueFmt={(v) => v.toLocaleString()} />
+            <BarChart width={w} height={h} labels={['0', '1']} values={res.counts} colors={['#4DFFA6', '#F5C84B']} yMax={n * 0.56}
+              band={{ lo: n / 2 - 3 * sigma, hi: n / 2 + 3 * sigma, color: '#FF8A5B' }} refLine={{ y: n / 2, label: 'n/2', color: '#FF8A5B' }} valueFmt={(v) => v.toLocaleString()} />
           )}</Fill>}
         </Panel>
         <Panel title="Random walk vs ±3√n" style={{ gridArea: 'walk' }}>
           {res && <Fill>{(w, h) => (
-            <LineChart width={w} height={h} series={[{ name: 'walk', x: res.walk.x, y: res.walk.walk, color: '#22E4FF', width: 1.3 }]}
-              band={{ x: res.walk.x, lo: res.walk.envelope.map((e) => -3 * e), hi: res.walk.envelope.map((e) => 3 * e), color: '#8B5CF6' }} xLabel="bits" />
+            <LineChart width={w} height={h} series={[{ name: 'walk', x: res.walk.x, y: res.walk.walk, color: '#4DFFA6', width: 1.3 }]}
+              band={{ x: res.walk.x, lo: res.walk.envelope.map((e) => -3 * e), hi: res.walk.envelope.map((e) => 3 * e), color: '#8F7CFF' }} xLabel="bits" />
           )}</Fill>}
         </Panel>
         <Panel title="Bit fingerprints (structure = not random)" style={{ gridArea: 'finger' }}>
@@ -160,8 +162,8 @@ export function QrngLab() {
         </Panel>
         <Panel title="Autocorrelation, lags 1–32" style={{ gridArea: 'auto' }}>
           {res && <Fill>{(w, h) => (
-            <LineChart width={w} height={h} series={[{ name: 'r(k)', x: res.autocorr.map((_, i) => i + 1), y: res.autocorr, color: '#2EE59D' }]}
-              band={{ x: res.autocorr.map((_, i) => i + 1), lo: res.autocorr.map(() => -3 / Math.sqrt(n)), hi: res.autocorr.map(() => 3 / Math.sqrt(n)), color: '#2EE59D' }} xLabel="lag" />
+            <LineChart width={w} height={h} series={[{ name: 'r(k)', x: res.autocorr.map((_, i) => i + 1), y: res.autocorr, color: '#B6FF6A' }]}
+              band={{ x: res.autocorr.map((_, i) => i + 1), lo: res.autocorr.map(() => -3 / Math.sqrt(n)), hi: res.autocorr.map(() => 3 / Math.sqrt(n)), color: '#B6FF6A' }} xLabel="lag" />
           )}</Fill>}
         </Panel>
         <Panel title="Bias fixing (extractors)" style={{ gridArea: 'extr' }}>
@@ -189,4 +191,8 @@ export function QrngLab() {
       </div>
     </div>
   )
+}
+
+export function QrngLab() {
+  return <LabShell title="QRNG LAB" subtitle="Problem 2 · random numbers from quantum coin flips" story={() => <QrngStory />} overview={() => <QrngOverview />} />
 }

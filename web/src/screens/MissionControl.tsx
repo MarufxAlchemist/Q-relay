@@ -82,7 +82,7 @@ export function MissionControl() {
             return (
               <div key={s.key} className="row" style={{ gap: 6 }}>
                 <div style={{ border: `1px solid ${col}`, color: col, padding: '5px 10px', borderRadius: 4, minWidth: 128,
-                  boxShadow: state === 'active' ? '0 0 14px rgba(34,228,255,0.35)' : 'none' }}>
+                  boxShadow: state === 'active' ? '0 0 14px rgba(77, 255, 166,0.35)' : 'none' }}>
                   <div style={{ fontSize: 11, letterSpacing: '0.14em', fontWeight: 600 }}>{i + 1}. {s.label}</div>
                   <div className="mono" style={{ fontSize: 9, opacity: 0.8 }}>{s.sub}</div>
                 </div>
@@ -141,7 +141,7 @@ export function MissionControl() {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
               style={{ position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)', color: 'var(--red)',
                 border: '1px solid var(--red)', padding: '6px 16px', borderRadius: 4, letterSpacing: '0.2em', fontWeight: 700,
-                background: 'rgba(255,77,94,0.1)', boxShadow: '0 0 24px rgba(255,77,94,0.4)' }}>
+                background: 'rgba(255, 84, 112,0.1)', boxShadow: '0 0 24px rgba(255, 84, 112,0.4)' }}>
               CLASSICAL REGIME · F &lt; 2/3
             </motion.div>
           )}

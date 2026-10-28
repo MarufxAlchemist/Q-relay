@@ -13,6 +13,7 @@ import secrets
 import sys
 import threading
 import time
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -172,8 +173,13 @@ def qrng_extractors():
 
 @app.get("/api/qrng/randu")
 def qrng_randu(n_bits: int = 200_000):
-    """'Break the PRNG': the suite on RANDU, computed live."""
-    b = stats.prng_randu(min(n_bits, 1_000_000))
+    """'Break the PRNG': the suite on RANDU (deterministic, so cached per size)."""
+    return _randu(min(n_bits, 1_000_000))
+
+
+@lru_cache(maxsize=4)
+def _randu(n_bits: int) -> dict:
+    b = stats.prng_randu(n_bits)
     return jsonable({"source": "PRNG", "name": "RANDU (low byte)", "suite": stats.run_suite(b),
                      "fingerprint": pack(stats.fingerprint(b, 256).ravel()), "walk": stats.random_walk(b),
                      "autocorr": stats.autocorrelation_profile(b), "counts": [int(len(b) - b.sum()), int(b.sum())]})
@@ -324,12 +330,19 @@ def game_quantum(req: GameQuantum):
 
 # ------------------------------------------------------------------ hardware
 
+@lru_cache(maxsize=8)
+def _analysis(file: str) -> dict:
+    """Analysing a record re-runs the full test suite on its bits; records never change, so cache by file name."""
+    rec = next(r for r in hardware.load_records() if r["file"] == file)
+    return jsonable(hardware.analyze(rec))
+
+
 @app.get("/api/hardware/results")
 def hardware_results():
     out = {}
     for src in ("HW", "EMU"):
         rec = hardware.latest(src)
-        out[src] = jsonable(hardware.analyze(rec)) if rec else None
+        out[src] = _analysis(rec["file"]) if rec else None
     out["labels"] = SOURCE_LABELS
     out["available"] = {"HW": out["HW"] is not None, "EMU": out["EMU"] is not None}
     return out

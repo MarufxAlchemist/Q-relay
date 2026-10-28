@@ -9,6 +9,8 @@ import { CircuitView, GATE_TO_OPS, TELEPORT_CIRCUIT } from '../components/Circui
 import { Heatmap, Histogram, LineChart } from '../components/charts'
 import { Fill, Panel } from '../components/Fill'
 import { CLASSICAL_BOUND, useStore } from '../store/useStore'
+import { LabShell } from '../components/Story'
+import { TeleportStory } from './TeleportStory'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -16,9 +18,9 @@ const CARD: [string, number, number][] = [
   ['|0⟩', 0, 0], ['|1⟩', Math.PI, 0], ['|+⟩', Math.PI / 2, 0], ['|−⟩', Math.PI / 2, Math.PI],
   ['|+i⟩', Math.PI / 2, Math.PI / 2], ['|−i⟩', Math.PI / 2, 3 * Math.PI / 2],
 ]
-const SERIES_COLORS = ['#22E4FF', '#FF3DA5', '#FFB020']
+const SERIES_COLORS = ['#4DFFA6', '#F5C84B', '#FF8A5B']
 
-export function TeleportLab() {
+function TeleportOverview() {
   const noise = useStore((s) => s.noise)
   const low = useStore((s) => s.lowPower)
   const [theta, setTheta] = useState(1.1)
@@ -63,18 +65,18 @@ export function TeleportLab() {
   const t1 = sweep?.teleport_t1_sweep
 
   return (
-    <div className="screen">
+    <div style={{ height: '100%' }}>
       <div className="fit" style={{ gridTemplateColumns: '1.5fr 1fr', gridTemplateRows: '1.3fr 1fr' }}>
         {/* 3-D stepper */}
         <section className="panel flex" style={{ padding: 0 }}>
           <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
             <Canvas dpr={low ? 1 : [1, 2]} camera={{ position: [0, 0.3, 8.6], fov: 36 }}>
-              <color attach="background" args={['#05060a']} />
+              <color attach="background" args={['#030806']} />
               <ambientLight intensity={0.5} />
               <BlochSphere vector={step <= 1 ? input : s?.bloch[0] ?? input} position={[-3.1, 0.15, 0]} scale={1.2} label="q0 · drag to set |ψ⟩"
                 onDrag={(p) => { const { theta: t, phi: f } = blochToAngles(fromThree(p)); setTheta(t); setPhi(f) }} />
-              <BlochSphere vector={s?.bloch[1] ?? [0, 0, 1]} position={[0, 0.15, 0]} scale={0.8} color="#8B5CF6" label="q1" dim trail={false} showLabels={false} />
-              <BlochSphere vector={s?.bloch[2] ?? [0, 0, 1]} position={[3.1, 0.15, 0]} scale={1.2} color="#FF3DA5" ghost={input} label="q2 · Bob" />
+              <BlochSphere vector={s?.bloch[1] ?? [0, 0, 1]} position={[0, 0.15, 0]} scale={0.8} color="#8F7CFF" label="q1" dim trail={false} showLabels={false} />
+              <BlochSphere vector={s?.bloch[2] ?? [0, 0, 1]} position={[3.1, 0.15, 0]} scale={1.2} color="#F5C84B" ghost={input} label="q2 · Bob" />
               <Effects />
             </Canvas>
             <div style={{ position: 'absolute', top: 8, left: 10, right: 150 }} className="row">
@@ -124,8 +126,8 @@ export function TeleportLab() {
           <Panel title={`Fidelity over ${states?.ideal_exact.n ?? 200} random states`} style={{ flex: 1 }}>
             {states && (
               <>
-                <Fill>{(w, h) => <Histogram width={w} height={h} values={states.noisy_exact.fidelities} min={0.5} max={1} color="#FF3DA5"
-                  refLine={{ x: CLASSICAL_BOUND, label: '2/3', color: '#FFB020' }} xLabel="fidelity (noisy: p2=0.1, p1=0.01, readout 0.02)" />}</Fill>
+                <Fill>{(w, h) => <Histogram width={w} height={h} values={states.noisy_exact.fidelities} min={0.5} max={1} color="#F5C84B"
+                  refLine={{ x: CLASSICAL_BOUND, label: '2/3', color: '#FF8A5B' }} xLabel="fidelity (noisy: p2=0.1, p1=0.01, readout 0.02)" />}</Fill>
                 <dl className="kv" style={{ gridTemplateColumns: 'auto 1fr auto 1fr' }}>
                   <dt>ideal exact</dt><dd>{states.ideal_exact.mean.toFixed(6)}</dd>
                   <dt>ideal tomography</dt><dd>{states.ideal_tomography.mean.toFixed(3)}±{states.ideal_tomography.std.toFixed(3)}</dd>
@@ -146,7 +148,7 @@ export function TeleportLab() {
                   ...Object.entries(sw1.curves).map(([k, v], i) => ({ name: k, x: sw1.p2, y: v as number[], color: SERIES_COLORS[i] })),
                   { name: 'analytic (CX-only)', x: sw1.p2, y: sw1.analytic_cx_only, color: '#ffffff', dashed: true, width: 1 },
                 ]}
-                hLines={[{ y: CLASSICAL_BOUND, label: 'classical limit 2/3', color: '#FFB020' }]}
+                hLines={[{ y: CLASSICAL_BOUND, label: 'classical limit 2/3', color: '#FF8A5B' }]}
                 markers={Object.entries(sw1.crossings).filter(([, x]) => x !== null).map(([, x], i) => ({ x: x as number, y: CLASSICAL_BOUND, label: `${(x as number).toFixed(2)}`, color: SERIES_COLORS[i] }))} />
             )}</Fill>}
           </Panel>
@@ -157,11 +159,15 @@ export function TeleportLab() {
             {states && <Fill>{(w, h) => <Heatmap width={w} height={h} grid={(states.cardinal_noisy_exact.ptm as number[][]).slice().reverse()} min={-1} max={1} cellText colLabels={['I', 'X', 'Y', 'Z']} rowLabels={['Z', 'Y', 'X', 'I']} />}</Fill>}
           </Panel>
           <Panel title="Thermal relaxation">
-            {t1 && <Fill>{(w, h) => <LineChart width={w} height={h} series={[{ name: 'F', x: t1.t1_us.map((v: number) => Math.log10(v)), y: t1.fidelity, color: '#8B5CF6' }]}
-              hLines={[{ y: CLASSICAL_BOUND, label: '2/3', color: '#FFB020' }]} xLabel="log₁₀ T1=T2 (µs)" yMin={0.5} yMax={1} />}</Fill>}
+            {t1 && <Fill>{(w, h) => <LineChart width={w} height={h} series={[{ name: 'F', x: t1.t1_us.map((v: number) => Math.log10(v)), y: t1.fidelity, color: '#8F7CFF' }]}
+              hLines={[{ y: CLASSICAL_BOUND, label: '2/3', color: '#FF8A5B' }]} xLabel="log₁₀ T1=T2 (µs)" yMin={0.5} yMax={1} />}</Fill>}
           </Panel>
         </div>
       </div>
     </div>
   )
+}
+
+export function TeleportLab() {
+  return <LabShell title="TELEPORT LAB" subtitle="Problem 1 · moving a qubit from Alice to Bob" story={() => <TeleportStory />} overview={() => <TeleportOverview />} />
 }

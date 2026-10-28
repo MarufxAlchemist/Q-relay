@@ -6,21 +6,21 @@ import { audio } from '../lib/audio'
 
 // ------------------------------------------------------------------ small illustrations
 
-const Arrow = ({ angle = 40, len = 44, color = '#22E4FF', spin = false }: { angle?: number; len?: number; color?: string; spin?: boolean }) => (
+const Arrow = ({ angle = 40, len = 44, color = '#4DFFA6', spin = false }: { angle?: number; len?: number; color?: string; spin?: boolean }) => (
   <g>
     {spin && <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite" />}
     <line x1="0" y1="0" x2={len * Math.sin((angle * Math.PI) / 180)} y2={-len * Math.cos((angle * Math.PI) / 180)} stroke={color} strokeWidth="4" strokeLinecap="round" />
     <circle cx={len * Math.sin((angle * Math.PI) / 180)} cy={-len * Math.cos((angle * Math.PI) / 180)} r="5" fill="#fff" />
   </g>
 )
-const Sphere = ({ x = 0, color = '#22E4FF', children, label }: { x?: number; color?: string; children?: ReactNode; label?: string }) => (
+const Sphere = ({ x = 0, color = '#4DFFA6', children, label }: { x?: number; color?: string; children?: ReactNode; label?: string }) => (
   <g transform={`translate(${x},0)`}>
     <circle r="52" fill={`${color}14`} stroke={color} strokeWidth="1.6" />
     <ellipse rx="52" ry="15" fill="none" stroke={`${color}66`} />
-    <text y="-58" textAnchor="middle" fontSize="11" fill="#8b97ad">|0⟩</text>
-    <text y="68" textAnchor="middle" fontSize="11" fill="#8b97ad">|1⟩</text>
+    <text y="-58" textAnchor="middle" fontSize="11" fill="#8FA89C">|0⟩</text>
+    <text y="68" textAnchor="middle" fontSize="11" fill="#8FA89C">|1⟩</text>
     {children}
-    {label && <text y="88" textAnchor="middle" fontSize="12" fill="#c9d3e6" letterSpacing="2">{label}</text>}
+    {label && <text y="88" textAnchor="middle" fontSize="12" fill="#CFE3D8" letterSpacing="2">{label}</text>}
   </g>
 )
 
@@ -28,8 +28,8 @@ const ART: Record<string, ReactNode> = {
   welcome: (
     <svg viewBox="-200 -90 400 190">
       <Sphere x={-120} label="ALICE"><Arrow angle={50} spin /></Sphere>
-      <Sphere x={120} color="#FF3DA5" label="BOB"><Arrow angle={50} color="#FF3DA5" spin /></Sphere>
-      <path d="M-66,0 C-30,-30 30,30 66,0" stroke="#8B5CF6" strokeWidth="3" fill="none" strokeDasharray="6 5">
+      <Sphere x={120} color="#F5C84B" label="BOB"><Arrow angle={50} color="#F5C84B" spin /></Sphere>
+      <path d="M-66,0 C-30,-30 30,30 66,0" stroke="#8F7CFF" strokeWidth="3" fill="none" strokeDasharray="6 5">
         <animate attributeName="stroke-dashoffset" from="22" to="0" dur="1s" repeatCount="indefinite" />
       </path>
     </svg>
@@ -37,16 +37,16 @@ const ART: Record<string, ReactNode> = {
   qubit: (
     <svg viewBox="-200 -90 400 190">
       <Sphere x={-120} label="CERTAIN 0"><Arrow angle={0} /></Sphere>
-      <Sphere x={0} color="#8B5CF6" label="BOTH AT ONCE"><Arrow angle={90} color="#8B5CF6" /></Sphere>
-      <Sphere x={120} color="#FF3DA5" label="BLURRY (ENTANGLED)"><Arrow angle={130} len={16} color="#FF3DA5" /></Sphere>
+      <Sphere x={0} color="#8F7CFF" label="BOTH AT ONCE"><Arrow angle={90} color="#8F7CFF" /></Sphere>
+      <Sphere x={120} color="#F5C84B" label="BLURRY (ENTANGLED)"><Arrow angle={130} len={16} color="#F5C84B" /></Sphere>
     </svg>
   ),
   qrng: (
     <svg viewBox="-200 -90 400 190">
       <Sphere x={-110}><Arrow angle={90} spin /></Sphere>
-      <text x="-30" y="5" fontSize="26" fill="#FFB020">→</text>
+      <text x="-30" y="5" fontSize="26" fill="#FF8A5B">→</text>
       {Array.from({ length: 24 }, (_, i) => (
-        <text key={i} x={10 + (i % 8) * 22} y={-30 + Math.floor(i / 8) * 30} fontSize="20" fontFamily="JetBrains Mono" fill={i % 3 ? '#22E4FF' : '#FF3DA5'}>
+        <text key={i} x={10 + (i % 8) * 22} y={-30 + Math.floor(i / 8) * 30} fontSize="20" fontFamily="JetBrains Mono" fill={i % 3 ? '#4DFFA6' : '#F5C84B'}>
           {(i * 7) % 3 ? 1 : 0}
           <animate attributeName="opacity" values="0;1;1" dur={`${0.4 + (i % 5) * 0.2}s`} />
         </text>
@@ -56,50 +56,50 @@ const ART: Record<string, ReactNode> = {
   teleport: (
     <svg viewBox="-200 -90 400 190">
       <Sphere x={-120} label="ALICE"><Arrow angle={40} /></Sphere>
-      <Sphere x={120} color="#FF3DA5" label="BOB"><Arrow angle={40} color="#FF3DA5" /></Sphere>
+      <Sphere x={120} color="#F5C84B" label="BOB"><Arrow angle={40} color="#F5C84B" /></Sphere>
       {[0, 1].map((i) => (
-        <rect key={i} y={34} width="14" height="14" rx="2" fill={i ? '#FF3DA5' : '#22E4FF'}>
+        <rect key={i} y={34} width="14" height="14" rx="2" fill={i ? '#F5C84B' : '#4DFFA6'}>
           <animate attributeName="x" values="-70;56" dur="1.8s" begin={`${i * 0.25}s`} repeatCount="indefinite" />
         </rect>
       ))}
-      <text y="-8" textAnchor="middle" fontSize="12" fill="#8B5CF6">entangled pair</text>
-      <text y="70" textAnchor="middle" fontSize="12" fill="#8b97ad">+ 2 ordinary bits</text>
+      <text y="-8" textAnchor="middle" fontSize="12" fill="#8F7CFF">entangled pair</text>
+      <text y="70" textAnchor="middle" fontSize="12" fill="#8FA89C">+ 2 ordinary bits</text>
     </svg>
   ),
   fidelity: (
     <svg viewBox="-200 -90 400 190">
-      <path d="M-90,40 A100,100 0 0 1 90,40" stroke="#2a3650" strokeWidth="14" fill="none" />
-      <path d="M-90,40 A100,100 0 0 1 20,-58" stroke="#2EE59D" strokeWidth="14" fill="none" />
-      <line x1="-10" y1="-62" x2="-16" y2="-38" stroke="#FFB020" strokeWidth="4" />
-      <text x="-26" y="-70" fontSize="13" fill="#FFB020">2/3 line</text>
-      <text y="30" textAnchor="middle" fontSize="30" fill="#2EE59D" fontFamily="JetBrains Mono">0.96</text>
+      <path d="M-90,40 A100,100 0 0 1 90,40" stroke="#233A30" strokeWidth="14" fill="none" />
+      <path d="M-90,40 A100,100 0 0 1 20,-58" stroke="#B6FF6A" strokeWidth="14" fill="none" />
+      <line x1="-10" y1="-62" x2="-16" y2="-38" stroke="#FF8A5B" strokeWidth="4" />
+      <text x="-26" y="-70" fontSize="13" fill="#FF8A5B">2/3 line</text>
+      <text y="30" textAnchor="middle" fontSize="30" fill="#B6FF6A" fontFamily="JetBrains Mono">0.96</text>
     </svg>
   ),
   dj: (
     <svg viewBox="-200 -90 400 190">
-      <rect x="-50" y="-50" width="100" height="100" rx="10" fill="#0a0d16" stroke="#FFB020" strokeWidth="2" />
-      <text y="16" textAnchor="middle" fontSize="54" fill="#FFB020">?</text>
-      <text x="-190" y="-30" fontSize="13" fill="#FF3DA5">classical: ask up to</text>
-      <text x="-190" y="-10" fontSize="13" fill="#FF3DA5">half + 1 questions</text>
-      <text x="80" y="-30" fontSize="13" fill="#22E4FF">quantum:</text>
-      <text x="80" y="-10" fontSize="13" fill="#22E4FF">ONE question</text>
+      <rect x="-50" y="-50" width="100" height="100" rx="10" fill="#07110D" stroke="#FF8A5B" strokeWidth="2" />
+      <text y="16" textAnchor="middle" fontSize="54" fill="#FF8A5B">?</text>
+      <text x="-190" y="-30" fontSize="13" fill="#F5C84B">classical: ask up to</text>
+      <text x="-190" y="-10" fontSize="13" fill="#F5C84B">half + 1 questions</text>
+      <text x="80" y="-30" fontSize="13" fill="#4DFFA6">quantum:</text>
+      <text x="80" y="-10" fontSize="13" fill="#4DFFA6">ONE question</text>
     </svg>
   ),
   noise: (
     <svg viewBox="-200 -90 400 190">
-      <path d="M-180,0 Q-150,-40 -120,0 T-60,0 T0,0" stroke="#22E4FF" strokeWidth="3" fill="none" />
-      <path d="M0,0 L10,-18 L18,12 L28,-25 L36,20 L46,-8 L54,14 L64,-30 L74,10 L84,-12 L96,22 L106,-16 L118,8 L130,-20 L142,16 L156,-6 L170,10 L180,-4" stroke="#FF4D5E" strokeWidth="3" fill="none" />
-      <text x="-120" y="50" fontSize="13" fill="#22E4FF">clean: quantum works</text>
-      <text x="40" y="50" fontSize="13" fill="#FF4D5E">noisy: magic fades</text>
+      <path d="M-180,0 Q-150,-40 -120,0 T-60,0 T0,0" stroke="#4DFFA6" strokeWidth="3" fill="none" />
+      <path d="M0,0 L10,-18 L18,12 L28,-25 L36,20 L46,-8 L54,14 L64,-30 L74,10 L84,-12 L96,22 L106,-16 L118,8 L130,-20 L142,16 L156,-6 L170,10 L180,-4" stroke="#FF5470" strokeWidth="3" fill="none" />
+      <text x="-120" y="50" fontSize="13" fill="#4DFFA6">clean: quantum works</text>
+      <text x="40" y="50" fontSize="13" fill="#FF5470">noisy: magic fades</text>
     </svg>
   ),
   controls: (
     <svg viewBox="-200 -90 400 190">
       {[['1–7', 'screens'], ['D', 'auto demo'], ['H', 'help'], ['M', 'music'], ['P', 'big captions'], ['Esc', 'menu']].map(([k, d], i) => (
         <g key={k} transform={`translate(${-170 + (i % 3) * 120},${-40 + Math.floor(i / 3) * 70})`}>
-          <rect width="44" height="34" rx="5" fill="#0a0d16" stroke="#22E4FF" />
-          <text x="22" y="22" textAnchor="middle" fontSize="14" fill="#22E4FF" fontFamily="JetBrains Mono">{k}</text>
-          <text x="52" y="22" fontSize="12" fill="#c9d3e6">{d}</text>
+          <rect width="44" height="34" rx="5" fill="#07110D" stroke="#4DFFA6" />
+          <text x="22" y="22" textAnchor="middle" fontSize="14" fill="#4DFFA6" fontFamily="JetBrains Mono">{k}</text>
+          <text x="52" y="22" fontSize="12" fill="#CFE3D8">{d}</text>
         </g>
       ))}
     </svg>
@@ -200,6 +200,7 @@ const HELP: Record<Screen, { title: string; items: [string, string][] }> = {
     ['Bottom right bars', 'The one-question puzzle: tall bar at 000 means “boring/constant”, no bar there means “fair/balanced”.'],
   ] },
   qrng: { title: 'QRNG Lab: are these bits really random?', items: [
+    ['Story / Overview', 'Story walks you through one idea at a time: press Next (or the → key), or Play story to let it narrate itself. Overview shows every chart at once.'],
     ['Falling bits', 'The random 0s and 1s as they come out.'],
     ['0/1 counts', 'Should be about 50/50. The orange band is how much wobble pure chance allows.'],
     ['Random walk', 'Go up for 1, down for 0. Random bits wander but stay inside the purple zone.'],
@@ -209,6 +210,7 @@ const HELP: Record<Screen, { title: string; items: [string, string][] }> = {
     ['SIM / EMU / HW', 'SIM bits are made by a simulator (secretly pseudo-random). Only HW bits come from a real quantum chip.'],
   ] },
   teleport: { title: 'Teleport Lab: send any state you like', items: [
+    ['Story / Overview', 'Story walks you through one idea at a time: press Next (or the → key), or Play story to let it narrate itself. Overview shows every chart at once.'],
     ['Drag the left ball', 'Choose any state for Alice. Bob (right) follows automatically.'],
     ['Step slider + circuit', 'Replay the protocol gate by gate. The lit box in the circuit is the current step.'],
     ['Branch table', "Alice's measurement has 4 possible results. In every one, Bob ends up perfect (F = 1)."],
@@ -216,6 +218,7 @@ const HELP: Record<Screen, { title: string; items: [string, string][] }> = {
     ['Charts at the bottom', 'How fidelity falls as noise rises, and where it crosses the 2/3 line.'],
   ] },
   dj: { title: 'DJ Lab: the one-question puzzle', items: [
+    ['Story / Overview', 'Story walks you through one idea at a time: press Next (or the → key), or Play story to let it narrate itself. Overview shows every chart at once.'],
     ['Oracle gallery', 'Pick a secret function (“box”). Constant = always same answer. Balanced = half yes, half no.'],
     ['Truth table', 'The answers hidden inside the box (pink = 1). The quantum computer never looks at this.'],
     ['Amplitude bars', 'Watch the 4 phases: spread over all inputs, flip signs where the answer is 1, then let them cancel or add up.'],

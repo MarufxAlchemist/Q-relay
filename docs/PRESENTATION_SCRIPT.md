@@ -64,7 +64,7 @@
 
 ## Part 3: Random numbers, Problem 2 (Parag · 2:15–3:30)
 
-*[Press **2** (QRNG Lab). Choose **1M** bits and click **Generate**.]*
+*[Press **2** (QRNG Lab). It opens in **Story** mode with the **IBM HW** bit source. Chapter 1 (the coin) is showing. Press **→** (or Next) through chapters 2–5 as you talk: the counters tick up, the bars grow, the random walk draws itself.]*
 
 > **Parag:** The circuit is the simplest in quantum computing: **put a qubit in superposition with a Hadamard gate, then measure it.** It comes out 0 or 1 like a perfect coin. Here we generated **one million bits**.
 >
@@ -72,31 +72,31 @@
 >
 > Then we run **ten statistical tests**, taken from the US NIST standard and written ourselves. Green means no pattern found.
 
-*[Click **Break the PRNG**. Point at the red cells and the striped fingerprint.]*
+*[Chapters 6–8: the fingerprints scan in, the ten detectives pop up one by one, then RANDU's stripes appear with its red tests.]*
 
 > **Parag:** To prove the tests actually catch bad randomness, we fed them a famously broken classical generator called **RANDU**. It **fails six of the ten tests**, and when you draw its bits as a picture you can **see stripes**. Good randomness looks like TV static.
 >
 > One honesty point: on a simulator, the "quantum" randomness is really produced by a classical algorithm. **Only bits from real hardware are truly random**, and the app labels that clearly.
 
-*[Point at the Bias fixing table.]*
+*[Chapter 9: the 100 hardware qubits as bars, then the before/after fixing chart.]*
 
 > **Parag:** Real devices are slightly biased, so we also implemented three **bias-fixing methods**: Von Neumann, XOR and Toeplitz hashing. Starting from a 40/60 unfair source, Von Neumann and Toeplitz bring it back to 50/50 and **pass all 10 tests**. Toeplitz keeps about three times more bits.
 
 ## Part 4: Teleportation, Problem 1 (Parag · 3:30–5:00)
 
-*[Press **3** (Teleport Lab). Drag the arrow on the left sphere around.]*
+*[Press **3** (Teleport Lab, Story mode). Chapter 1: drag the arrow on the left sphere around.]*
 
 > **Parag:** You can **pick any state by dragging Alice's sphere**, and Bob's sphere follows. That's what "arbitrary state" means.
 
-*[Drag the **step** slider from left to right slowly.]*
+*[Press **→** for chapters 2, 3 and 4: the spheres step through the protocol by themselves, with the glowing gate moving along the circuit.]*
 
 > **Parag:** The step slider replays the circuit gate by gate: the Bell pair, Alice's measurement, then Bob's corrections. It's a **dynamic circuit**: the measurement happens in the middle and the result controls the next gates, exactly like the real protocol.
 
-*[Point at the branch table.]*
+*[Chapter 5: the four outcome rows appear one by one; then chapter 6, the 200-state histograms.]*
 
 > **Parag:** How do we know it works? Alice's measurement has **four possible outcomes**, and in **every one of the four** Bob's fidelity is **exactly 1**. We check it four independent ways: exact density matrices, our own tomography, an average over **200 random states**, and a full process matrix.
 
-*[Point at the "Average fidelity vs noise" chart.]*
+*[Chapter 7: the noise curves draw themselves and the circles mark the 2/3 crossings. Then jump to chapter 9 (real IBM results) or leave that for Vaibhav.]*
 
 > **Parag:** For noise, we **derived a formula** for the simplest case, and the dashed line from the formula sits exactly on the simulation. The curves cross the **2/3 line at noise of about 0.38 to 0.42**. That's our **quantum-advantage threshold**.
 >
@@ -110,13 +110,13 @@
 
 ## Part 5: Deutsch–Jozsa, Problem 3 (Vaibhav · 5:00–6:30)
 
-*[Press **4** (DJ Lab). Select **n = 3**, oracle **parity**. Click **Replay**.]*
+*[Press **4** (DJ Lab, Story mode). Chapter 1 shows the box and its secret answers. Press **→** through chapters 3, 4 and 5: the bars spread out, flip, then cancel, and the verdict pops in.]*
 
 > **Vaibhav:** Imagine a sealed box. You give it an input, it answers 0 or 1. We're promised it's either **constant**, always the same answer, or **balanced**, exactly half zeros and half ones. Which one is it?
 >
 > Watch the bars, one per possible input. **First, superposition:** we ask about all inputs at once, so every bar is equal. **Second, phase kickback:** after one question, the inputs where the answer is 1 **flip upside down**. **Third, interference:** the waves combine. For a balanced box, the bar at 000 **cancels to exactly zero**, and for a constant box all the height piles onto it.
 
-*[Click **const_1** to show the opposite case, then point at the Query race.]*
+*[On the left, change **box** to **const_1** to show the opposite case; then go back to chapter 2 (the race and the growth chart).]*
 
 > **Vaibhav:** A normal computer might need **half the inputs plus one**: for 20 bits, more than half a million questions. Quantum: **one**. We even simulated an adversary box that tries to fool a classical algorithm, and it needs exactly that many. And we checked **every possible function** for up to 3 bits: all 80 classified correctly.
 
@@ -132,11 +132,9 @@
 
 *[Press **6** (Hardware).]*
 
-> **Vaibhav:** Here, simulator, **emulated IBM device** and **real hardware** sit side by side, each with a badge. On the emulated IBM Brisbane chip, teleportation fidelity is **about 0.96, far above 2/3**, and Deutsch–Jozsa still gets every circuit right.
+> **Vaibhav:** Here, simulator, **emulated IBM device** and **real hardware** sit side by side, each with a badge. And yes, we ran it on a **real IBM quantum computer**, ibm_marrakesh, job ID shown right here.
 >
-> *(If hardware results are shown:)* On the real IBM machine, with job ID shown here, we got **[read the F_avg number]**.
->
-> *(If not:)* Real hardware time is limited, so the script is ready and we **never show emulated numbers as hardware**.
+> Teleportation on real hardware: average fidelity **0.978**, far above the 2/3 classical limit. With true mid-circuit measurement it's **0.880**, still clearly quantum; the drop happens because the qubit loses phase while it waits for the result. Deutsch–Jozsa got **all 10 circuits right**, and we collected **819,200 physically random bits**. The detectives even caught a tiny real bias in them, which our extractors then fixed.
 >
 > Everything is backed by **four executed Jupyter notebooks**, a written report with derivations, and **53 automated tests**.
 
@@ -183,6 +181,8 @@
 |---|---|
 | Red "Backend offline" box | In a terminal: `.\tasks.ps1 demo`, then refresh the page |
 | Laptop lagging | Press **L** (low power) |
+| A lab looks crowded or a judge wants every chart at once | Click **OVERVIEW (all panels)** at the top right of the lab |
+| Want the lab to narrate itself | Click **▶ Play story** (chapters advance automatically) |
 | Mission seems stuck | Press **Esc** then **NEW MISSION**, or press **D** for the automatic demo |
 | No sound | Click anywhere once (browsers need a click), or press **M** |
 | Projector text too small | Press **P** for presenter captions, or Ctrl + and Ctrl − to zoom |

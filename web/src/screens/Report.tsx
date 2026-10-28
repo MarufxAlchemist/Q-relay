@@ -70,9 +70,9 @@ export function Report() {
           <h3>Headline result: quantum-advantage threshold</h3>
           {sw && <Fill minH={220}>{(w, h) => (
             <LineChart width={w} height={h} yMin={0.5} yMax={1} xLabel="p₂" yLabel="F_avg"
-              series={[{ name: 'depolarizing', x: sw.p2, y: sw.curves['depolarizing (p1 = p2/10)'], color: '#22E4FF' }]}
-              hLines={[{ y: CLASSICAL_BOUND, label: '2/3', color: '#FFB020' }]}
-              markers={sw.crossings['depolarizing (p1 = p2/10)'] ? [{ x: sw.crossings['depolarizing (p1 = p2/10)'], y: CLASSICAL_BOUND, label: `p₂* ≈ ${sw.crossings['depolarizing (p1 = p2/10)'].toFixed(3)}`, color: '#FF3DA5' }] : []} />
+              series={[{ name: 'depolarizing', x: sw.p2, y: sw.curves['depolarizing (p1 = p2/10)'], color: '#4DFFA6' }]}
+              hLines={[{ y: CLASSICAL_BOUND, label: '2/3', color: '#FF8A5B' }]}
+              markers={sw.crossings['depolarizing (p1 = p2/10)'] ? [{ x: sw.crossings['depolarizing (p1 = p2/10)'], y: CLASSICAL_BOUND, label: `p₂* ≈ ${sw.crossings['depolarizing (p1 = p2/10)'].toFixed(3)}`, color: '#F5C84B' }] : []} />
           )}</Fill>}
         </div>
         <div className="panel" style={{ gridColumn: 'span 2' }}>

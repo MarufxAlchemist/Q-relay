@@ -6,15 +6,17 @@ import { BarChart, Heatmap, LineChart } from '../components/charts'
 import { Fill, Panel } from '../components/Fill'
 import { NoiseSlider, Seg, SourceBadge } from '../components/controls'
 import { useStore } from '../store/useStore'
+import { LabShell } from '../components/Story'
+import { DjStory } from './DjStory'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const STAGE_TITLES: Record<string, string> = {
+export const STAGE_TITLES: Record<string, string> = {
   init: '0 · initial', superposition: '1 · superposition', oracle: '2 · phase kickback', interference: '3 · interference',
 }
 
 /** Classical counter racing to 2^(n-1)+1 while the quantum computer finishes at 1. */
-function QueryRace({ n, go }: { n: number; go: number }) {
+export function QueryRace({ n, go }: { n: number; go: number }) {
   const worst = 2 ** (n - 1) + 1
   const [c, setC] = useState(0)
   const [q, setQ] = useState(0)
@@ -43,14 +45,14 @@ function QueryRace({ n, go }: { n: number; go: number }) {
   )
   return (
     <div style={{ display: 'grid', gap: 8 }}>
-      {bar(q, '#22E4FF', 'quantum')}
-      {bar(c, '#FF3DA5', 'classical')}
+      {bar(q, '#4DFFA6', 'quantum')}
+      {bar(c, '#F5C84B', 'classical')}
       <div className="tip">Deterministic classical worst case: 2^(n−1)+1 = {worst.toLocaleString()} queries. Verified against an adversarial oracle that answers 0 for as long as it can.</div>
     </div>
   )
 }
 
-export function DjLab() {
+function DjOverview() {
   const noise = useStore((s) => s.noise)
   const raceTick = useStore((s) => s.tick['dj.race'] ?? 0)
   const [n, setN] = useState(3)
@@ -104,7 +106,7 @@ export function DjLab() {
   const nn = String(Math.min(Math.max(n, 2), 6))
 
   return (
-    <div className="screen">
+    <div style={{ height: '100%' }}>
       <div className="fit" style={{ gridTemplateColumns: '0.95fr 1.55fr 1fr', gridTemplateRows: '1.3fr 1fr' }}>
         <Panel title="Oracle gallery">
           <div className="row"><span className="lbl">n</span><Seg value={n} options={[1, 2, 3, 4, 5, 6, 7, 8] as const} onChange={setN} /></div>
@@ -112,7 +114,7 @@ export function DjLab() {
             {oracles.map((o) => (
               <button key={o.name} onClick={() => setOracle(o.name)} className="panel"
                 style={{ cursor: 'pointer', textAlign: 'left', padding: '4px 8px', borderColor: o.name.startsWith(oracle) ? 'var(--cyan)' : undefined,
-                  boxShadow: o.name.startsWith(oracle) ? '0 0 12px rgba(34,228,255,0.25)' : undefined, color: 'var(--text)' }}>
+                  boxShadow: o.name.startsWith(oracle) ? '0 0 12px rgba(77, 255, 166,0.25)' : undefined, color: 'var(--text)' }}>
                 <div className="mono" style={{ fontSize: 11.5 }}>{o.name}</div>
                 <div className="mono" style={{ fontSize: 9.5, color: o.kind === 'constant' ? 'var(--cyan)' : 'var(--magenta)' }}>{o.kind} · {o.cx} CX</div>
               </button>
@@ -142,7 +144,7 @@ export function DjLab() {
           {res && (
             <div className="row" style={{ justifyContent: 'space-between', marginTop: 4, padding: '5px 10px', borderRadius: 6,
               border: `1px solid ${res.verdict === 'constant' ? 'var(--cyan)' : 'var(--magenta)'}`,
-              background: res.verdict === 'constant' ? 'rgba(34,228,255,0.08)' : 'rgba(255,61,165,0.08)' }}>
+              background: res.verdict === 'constant' ? 'rgba(77, 255, 166,0.08)' : 'rgba(245, 200, 75,0.08)' }}>
               <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '0.2em', color: res.verdict === 'constant' ? 'var(--cyan)' : 'var(--magenta)' }}>{res.verdict.toUpperCase()}</span>
               <span className={res.correct ? 'green' : 'red'}>{res.correct ? '✓ matches the truth' : '✗ wrong (noise)'}</span>
               <span className="mono dim" style={{ fontSize: 11 }}>P(0…0) exact {res.p_all_zeros_exact.toFixed(2)} · measured {res.p_all_zeros.toFixed(3)}</span>
@@ -157,7 +159,7 @@ export function DjLab() {
           </Panel>
           <Panel title="Measured outcomes (2048 shots)" right={<SourceBadge source="SIM" />} style={{ flex: 1 }}>
             {res && <Fill>{(w, h) => <BarChart width={w} height={h} labels={countsSorted.map(([k]) => k)} values={countsSorted.map(([, v]) => v)}
-              colors={countsSorted.map(([k]) => (/^0+$/.test(k) ? '#22E4FF' : '#FF3DA5'))} valueFmt={(v) => String(v)} />}</Fill>}
+              colors={countsSorted.map(([k]) => (/^0+$/.test(k) ? '#4DFFA6' : '#F5C84B'))} valueFmt={(v) => String(v)} />}</Fill>}
             <div className="tip">All zeros ⇒ constant. Anything else ⇒ balanced.</div>
           </Panel>
         </div>
@@ -167,9 +169,9 @@ export function DjLab() {
             {complexity && <Fill>{(w, h) => (
               <LineChart width={w} height={h} logY legendPos="br" xLabel="input bits n"
                 series={[
-                  { name: 'classical 2^(n−1)+1', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map((r: any) => r.classical_worst), color: '#FF3DA5' },
-                  { name: 'adversary (measured)', x: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.n), y: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.adversary), color: '#FFB020', dashed: true },
-                  { name: 'quantum: 1', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map(() => 1), color: '#22E4FF' },
+                  { name: 'classical 2^(n−1)+1', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map((r: any) => r.classical_worst), color: '#F5C84B' },
+                  { name: 'adversary (measured)', x: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.n), y: complexity.rows.filter((r: any) => r.adversary).map((r: any) => r.adversary), color: '#FF8A5B', dashed: true },
+                  { name: 'quantum: 1', x: complexity.rows.map((r: any) => r.n), y: complexity.rows.map(() => 1), color: '#4DFFA6' },
                 ]} />
             )}</Fill>}
           </Panel>
@@ -178,9 +180,9 @@ export function DjLab() {
               <LineChart width={w} height={h} yMin={0} yMax={1} legendPos="bl" xLabel="depolarizing p₂ (p₁ = p₂/10)"
                 series={Object.entries(nd).map(([k, v]: [string, any], i) => ({
                   name: `${k} (${v.cx} CX)`, x: noiseData.levels_p2, y: v.success,
-                  color: ['#22E4FF', '#5ab8ff', '#FF3DA5', '#8B5CF6', '#FFB020', '#2EE59D'][i % 6], dashed: v.kind === 'constant',
+                  color: ['#4DFFA6', '#6FE3C1', '#F5C84B', '#8F7CFF', '#FF8A5B', '#B6FF6A'][i % 6], dashed: v.kind === 'constant',
                 }))}
-                hLines={[{ y: 1 - 2 ** -Number(nn), label: 'chance floor 1−2⁻ⁿ', color: '#56627a' }]} />
+                hLines={[{ y: 1 - 2 ** -Number(nn), label: 'chance floor 1−2⁻ⁿ', color: '#5B7268' }]} />
             )}</Fill>}
           </Panel>
           <Panel title="Which stage hurts more? (parity, n=3)">
@@ -190,4 +192,8 @@ export function DjLab() {
       </div>
     </div>
   )
+}
+
+export function DjLab() {
+  return <LabShell title="DJ LAB" subtitle="Problem 3 · the one-question puzzle (Deutsch–Jozsa)" story={() => <DjStory />} overview={() => <DjOverview />} />
 }

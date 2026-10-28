@@ -1,7 +1,7 @@
 import type { CircuitJson, CircuitOp } from '../lib/api'
 
 const GATE_COLOR: Record<string, string> = {
-  h: '#22E4FF', x: '#FF3DA5', z: '#8B5CF6', u: '#2EE59D', sdg: '#8B5CF6', s: '#8B5CF6', measure: '#FFB020', ry: '#2EE59D',
+  h: '#4DFFA6', x: '#F5C84B', z: '#8F7CFF', u: '#B6FF6A', sdg: '#8F7CFF', s: '#8F7CFF', measure: '#FF8A5B', ry: '#B6FF6A',
 }
 
 function label(op: CircuitOp): string {
@@ -36,14 +36,14 @@ export function CircuitView({ circuit, highlight = [], qubitLabels, height }: {
     <svg width="100%" height={height ?? '100%'} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
       {Array.from({ length: circuit.num_qubits }, (_, q) => (
         <g key={q}>
-          <text x={6} y={qy(q) + 4} fontSize="11" fill="#8b97ad" fontFamily="JetBrains Mono">{qubitLabels?.[q] ?? `q${q}`}</text>
-          <line x1={x0 - 10} x2={W - 10} y1={qy(q)} y2={qy(q)} stroke="rgba(120,160,220,0.35)" />
+          <text x={6} y={qy(q) + 4} fontSize="11" fill="#8FA89C" fontFamily="JetBrains Mono">{qubitLabels?.[q] ?? `q${q}`}</text>
+          <line x1={x0 - 10} x2={W - 10} y1={qy(q)} y2={qy(q)} stroke="rgba(110, 200, 160,0.35)" />
         </g>
       ))}
       {items.map(({ op, col, i }) => {
         const hot = highlight.includes(i)
         const x = cx(col)
-        const color = GATE_COLOR[op.name] ?? '#c9d3e6'
+        const color = GATE_COLOR[op.name] ?? '#CFE3D8'
         const glow = hot ? { filter: `drop-shadow(0 0 6px ${color})` } : undefined
         const op_opacity = highlight.length && !hot ? 0.45 : 1
         if (op.name === 'cx' || op.name === 'cz' || op.name === 'mcx') {
@@ -52,13 +52,13 @@ export function CircuitView({ circuit, highlight = [], qubitLabels, height }: {
           const ys = op.qubits.map(qy)
           return (
             <g key={i} style={glow} opacity={op_opacity}>
-              <line x1={x} x2={x} y1={Math.min(...ys)} y2={Math.max(...ys)} stroke={hot ? '#22E4FF' : '#c9d3e6'} strokeWidth={1.5} />
-              {ctrls.map((q) => <circle key={q} cx={x} cy={qy(q)} r={4.5} fill={hot ? '#22E4FF' : '#c9d3e6'} />)}
-              {op.name === 'cz' ? <circle cx={x} cy={qy(t)} r={4.5} fill={hot ? '#22E4FF' : '#c9d3e6'} /> : (
+              <line x1={x} x2={x} y1={Math.min(...ys)} y2={Math.max(...ys)} stroke={hot ? '#4DFFA6' : '#CFE3D8'} strokeWidth={1.5} />
+              {ctrls.map((q) => <circle key={q} cx={x} cy={qy(q)} r={4.5} fill={hot ? '#4DFFA6' : '#CFE3D8'} />)}
+              {op.name === 'cz' ? <circle cx={x} cy={qy(t)} r={4.5} fill={hot ? '#4DFFA6' : '#CFE3D8'} /> : (
                 <g>
-                  <circle cx={x} cy={qy(t)} r={10} fill="#05060a" stroke={hot ? '#22E4FF' : '#c9d3e6'} strokeWidth={1.5} />
-                  <line x1={x - 10} x2={x + 10} y1={qy(t)} y2={qy(t)} stroke={hot ? '#22E4FF' : '#c9d3e6'} strokeWidth={1.5} />
-                  <line x1={x} x2={x} y1={qy(t) - 10} y2={qy(t) + 10} stroke={hot ? '#22E4FF' : '#c9d3e6'} strokeWidth={1.5} />
+                  <circle cx={x} cy={qy(t)} r={10} fill="#030806" stroke={hot ? '#4DFFA6' : '#CFE3D8'} strokeWidth={1.5} />
+                  <line x1={x - 10} x2={x + 10} y1={qy(t)} y2={qy(t)} stroke={hot ? '#4DFFA6' : '#CFE3D8'} strokeWidth={1.5} />
+                  <line x1={x} x2={x} y1={qy(t) - 10} y2={qy(t) + 10} stroke={hot ? '#4DFFA6' : '#CFE3D8'} strokeWidth={1.5} />
                 </g>
               )}
             </g>
@@ -68,7 +68,7 @@ export function CircuitView({ circuit, highlight = [], qubitLabels, height }: {
         if (op.name === 'measure') {
           return (
             <g key={i} style={glow} opacity={op_opacity}>
-              <rect x={x - 14} y={y - 13} width={28} height={26} rx={3} fill="#05060a" stroke={color} strokeWidth={hot ? 2 : 1.2} />
+              <rect x={x - 14} y={y - 13} width={28} height={26} rx={3} fill="#030806" stroke={color} strokeWidth={hot ? 2 : 1.2} />
               <path d={`M${x - 9},${y + 6} A9,9 0 0 1 ${x + 9},${y + 6}`} fill="none" stroke={color} strokeWidth={1.2} />
               <line x1={x} x2={x + 7} y1={y + 6} y2={y - 6} stroke={color} strokeWidth={1.2} />
             </g>
@@ -78,14 +78,14 @@ export function CircuitView({ circuit, highlight = [], qubitLabels, height }: {
           <g key={i} style={glow} opacity={op_opacity}>
             {op.condition && (
               <>
-                <line x1={x - 1.5} x2={x - 1.5} y1={y + 13} y2={H - 2} stroke="#FFB020" strokeWidth={1} opacity={0.6} />
-                <line x1={x + 1.5} x2={x + 1.5} y1={y + 13} y2={H - 2} stroke="#FFB020" strokeWidth={1} opacity={0.6} />
-                <text x={x} y={y - 16} textAnchor="middle" fontSize="8.5" fill="#FFB020" fontFamily="JetBrains Mono">
+                <line x1={x - 1.5} x2={x - 1.5} y1={y + 13} y2={H - 2} stroke="#FF8A5B" strokeWidth={1} opacity={0.6} />
+                <line x1={x + 1.5} x2={x + 1.5} y1={y + 13} y2={H - 2} stroke="#FF8A5B" strokeWidth={1} opacity={0.6} />
+                <text x={x} y={y - 16} textAnchor="middle" fontSize="8.5" fill="#FF8A5B" fontFamily="JetBrains Mono">
                   {op.condition.register}=={op.condition.value}
                 </text>
               </>
             )}
-            <rect x={x - 17} y={y - 13} width={34} height={26} rx={3} fill="#05060a" stroke={color} strokeWidth={hot ? 2.2 : 1.2} />
+            <rect x={x - 17} y={y - 13} width={34} height={26} rx={3} fill="#030806" stroke={color} strokeWidth={hot ? 2.2 : 1.2} />
             <text x={x} y={y + 4} textAnchor="middle" fontSize={label(op).length > 3 ? 8.5 : 12} fill={color} fontFamily="JetBrains Mono" fontWeight={600}>
               {label(op)}
             </text>

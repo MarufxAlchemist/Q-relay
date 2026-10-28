@@ -41,17 +41,17 @@ export function FidelityGauge({ value, size = 150, label = 'Fidelity' }: { value
   const toF = (f: number) => Math.max(0, Math.min(1, (f - 0.5) / 0.5))
   const v = value ?? 0.5
   const quantum = value !== null && value > CLASSICAL_BOUND
-  const col = value === null ? '#56627a' : quantum ? (v > 0.9 ? '#2EE59D' : '#22E4FF') : '#FF4D5E'
+  const col = value === null ? '#5B7268' : quantum ? (v > 0.9 ? '#B6FF6A' : '#4DFFA6') : '#FF5470'
   const [bx, by] = pt(toF(CLASSICAL_BOUND))
   return (
     <div style={{ position: 'relative', width: size, height: size }}>
       <svg width={size} height={size}>
-        <path d={arc(0, 1)} stroke="rgba(120,160,220,0.18)" strokeWidth={size < 60 ? 5 : 9} fill="none" strokeLinecap="round" />
-        <path d={arc(0, toF(CLASSICAL_BOUND))} stroke="rgba(255,77,94,0.25)" strokeWidth={size < 60 ? 5 : 9} fill="none" />
+        <path d={arc(0, 1)} stroke="rgba(110, 200, 160,0.18)" strokeWidth={size < 60 ? 5 : 9} fill="none" strokeLinecap="round" />
+        <path d={arc(0, toF(CLASSICAL_BOUND))} stroke="rgba(255, 84, 112,0.25)" strokeWidth={size < 60 ? 5 : 9} fill="none" />
         <path d={arc(0, Math.max(0.001, toF(v)))} stroke={col} strokeWidth={size < 60 ? 5 : 9} fill="none" strokeLinecap="round"
           style={{ filter: `drop-shadow(0 0 6px ${col})` }} />
-        <line x1={bx} y1={by} x2={size / 2 + (bx - size / 2) * 0.72} y2={size / 2 + (by - size / 2) * 0.72} stroke="#FFB020" strokeWidth={2} />
-        {size >= 60 && <text x={size / 2 + (bx - size / 2) * 0.6} y={size / 2 + (by - size / 2) * 0.6 + 3} fontSize="9" fill="#FFB020" textAnchor="middle" fontFamily="JetBrains Mono">2/3</text>}
+        <line x1={bx} y1={by} x2={size / 2 + (bx - size / 2) * 0.72} y2={size / 2 + (by - size / 2) * 0.72} stroke="#FF8A5B" strokeWidth={2} />
+        {size >= 60 && <text x={size / 2 + (bx - size / 2) * 0.6} y={size / 2 + (by - size / 2) * 0.6 + 3} fontSize="9" fill="#FF8A5B" textAnchor="middle" fontFamily="JetBrains Mono">2/3</text>}
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
         <div>
@@ -86,7 +86,7 @@ export function Seg<T extends string | number>({ value, options, onChange, label
 
 export function BitLamp({ bit, label }: { bit: number | null; label: string }) {
   const on = bit === 1
-  const col = bit === null ? '#2a3650' : on ? '#FF3DA5' : '#22E4FF'
+  const col = bit === null ? '#233A30' : on ? '#F5C84B' : '#4DFFA6'
   return (
     <div style={{ display: 'grid', justifyItems: 'center', gap: 4 }}>
       <motion.div animate={{ boxShadow: bit === null ? 'none' : `0 0 22px ${col}` }}

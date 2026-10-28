@@ -79,8 +79,8 @@ export function Hardware() {
                   <div key={s} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
                     <div className="row"><SourceBadge source={s} /><span className="mono dim" style={{ fontSize: 11 }}>{d[s].backend} · {variant(d[s])}</span></div>
                     <Fill>{(w, h) => <BarChart width={w} height={h} labels={STATES.map((x) => x.replace('>', '⟩'))} values={STATES.map((k) => t.states[k]?.fidelity ?? 0)} yMax={1.08}
-                      colors={STATES.map((k) => ((t.states[k]?.fidelity ?? 0) > CLASSICAL_BOUND ? (s === 'HW' ? '#2EE59D' : '#FFB020') : '#FF4D5E'))}
-                      refLine={{ y: CLASSICAL_BOUND, label: 'classical 2/3', color: '#FFB020' }} valueFmt={(v) => v.toFixed(3)} />}</Fill>
+                      colors={STATES.map((k) => ((t.states[k]?.fidelity ?? 0) > CLASSICAL_BOUND ? (s === 'HW' ? '#B6FF6A' : '#FF8A5B') : '#FF5470'))}
+                      refLine={{ y: CLASSICAL_BOUND, label: 'classical 2/3', color: '#FF8A5B' }} valueFmt={(v) => v.toFixed(3)} />}</Fill>
                   </div>
                 )
               })}
@@ -98,7 +98,7 @@ export function Hardware() {
                   <div className="row"><SourceBadge source={s} /></div>
                   <Fill>{(w, h) => <BarChart width={w} height={h} labels={djTags.map((t) => t.replace('distdj_n2_', 'D·').replace('dj_n', '').replace('random_bal', 'rnd').replace('const_', 'c').replace('parity', 'par'))}
                     values={djTags.map((t) => d[s].dj.find((x: any) => x.tag === t)?.success_probability ?? 0)} yMax={1.1}
-                    colors={djTags.map((t) => (t.includes('const') ? '#22E4FF' : '#FF3DA5'))} valueFmt={(v) => v.toFixed(2)} />}</Fill>
+                    colors={djTags.map((t) => (t.includes('const') ? '#4DFFA6' : '#F5C84B'))} valueFmt={(v) => v.toFixed(2)} />}</Fill>
                 </div>
               ))}
               <div className="tip">Labels: n_oracle (c = constant, par = parity, rnd = random balanced, D· = teleported ancilla).</div>

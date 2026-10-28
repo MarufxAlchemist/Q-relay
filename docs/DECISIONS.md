@@ -58,3 +58,24 @@
   from QRNG bits (SIM-labelled bits from the boot fetch). Noise closes a low-pass filter, adds hiss, detunes and drops
   notes. Event sound effects for classical bits, fidelity below 2/3, and the DJ verdict. Starts only after a user gesture.
 - Teleport Lab ignores stale responses (request id) and shows loading and error states.
+
+## Hardware run (2026-10-28)
+- Submitted one SamplerV2 job to `ibm_marrakesh` (156-qubit Heron, dynamic circuits supported): job ID
+  `dbgnmpote5oc738iia1g`. 47 circuits; dry-run estimate ~170 s of the 600 s monthly allowance.
+  If the local session dies before results return: `python scripts/run_hardware.py --fetch dbgnmpote5oc738iia1g`.
+
+## Hardware results (2026-10-28)
+- ibm_marrakesh job `dbgnmpote5oc738iia1g`, 55 s QPU. Teleport F_avg: deferred 0.978, dynamic 0.880 (equatorial states
+  ~0.82; PTM X/Y 0.65/0.69 vs Z 0.94 suggests dephasing during the feed-forward wait). DJ 10/10 correct (random balanced
+  0.888 / 0.855; distributed DJ parity 0.861). QRNG 819,200 bits: 8/10 tests (monobit, cusum fail; per-qubit P(1)
+  0.435–0.530); every extractor restores 10/10.
+
+## Phase 7 — story mode and astronomical "Loki" theme (user request)
+- QRNG, Teleport and DJ labs open in a chaptered Story (one or two big visuals + plain-language narration; Next/Play,
+  arrow keys); the previous dashboards are kept as "Overview (all panels)".
+- Charts build up when they mount (lines draw, bars grow, heatmaps wave in, fingerprints scan in, test cells pop,
+  numbers count up). Low-power mode skips the animations.
+- Palette: Loki green (Alice / 0), TVA gold (Bob / 1), coral for the 2/3 line, red for failures; twinkling starfield with
+  shooting stars and nebula gradients; stars inside 3-D scenes.
+- Server caches `analyze()` of hardware records and the RANDU suite (both deterministic); otherwise the story's parallel
+  first requests re-ran the full test suite on 819k bits and stalled the UI for several seconds.

@@ -4,7 +4,7 @@
 
 Stack: Python 3.12.5, Qiskit 2.6.1, qiskit-aer 0.18.2, qiskit-ibm-runtime 0.51.0, NumPy 2.5.4, SciPy 1.18.1. Code: `qrelay/` (library), `notebooks/01–04` (executed), `tests/` (53 tests), `web/` + `server/` (interactive demo). Derivations: `docs/THEORY.md`.
 
-> **Honesty notes.** (1) Aer's measurement outcomes come from a classical PRNG, so SIM "quantum" bits are pseudo-random. Only HW bits are physically random. (2) EMU results are never presented as hardware. (3) Passing statistical tests does not prove randomness. (4) A teleportation channel is certified quantum only when average fidelity exceeds the classical bound 2/3.
+> **Honesty notes.** (1) Aer's measurement outcomes come from a classical PRNG, so SIM "quantum" bits are pseudo-random. Only HW bits are physically random. (2) EMU results are never presented as hardware. (3) Passing statistical tests does not prove randomness. (4) A teleportation channel is certified quantum only when average fidelity exceeds the classical bound 2/3. Hardware numbers come from one IBM job (`dbgnmpote5oc738iia1g`, ibm_marrakesh, 2026-10-28).
 
 ---
 
@@ -38,11 +38,11 @@ The step engine shows the physics: after the Bell CX both q1 and q2 have $|\vec 
 
 ![2D sweep and PTM](figures/teleport_heatmap.png)
 
-**Device results [EMU, fake_brisbane, 4096 shots, cardinal-state tomography].** $F_{avg}=0.965$ (deferred) and $0.962$ (dynamic), with per-state $0.951$–$0.977$, all far above 2/3. The PTM is close to diagonal (0.93/0.91/0.93): mostly depolarizing-type error. *Hardware results, if run, appear in `data/hardware/hw_batch_*.json` and on the Hardware page with their IBM job ID.*
+**Real hardware [HW, IBM ibm_marrakesh (156-qubit Heron), job `dbgnmpote5oc738iia1g`, 4096 shots, cardinal-state tomography].** Deferred-measurement circuit: $F_{avg}=0.978$ (per state 0.958–0.984, PTM diagonal 0.95/0.97/0.95). Dynamic circuit with real mid-circuit measurement and feed-forward: $F_{avg}=0.880$. The $|0angle,|1angle$ states stay at 0.96–0.98, but the equatorial states drop to about 0.82, and the PTM shows X/Y = 0.65/0.69 against Z = 0.94. That is the signature of **dephasing while the qubit waits for the classical feed-forward**. Both circuits are far above 2/3: **genuine quantum teleportation on hardware.** The whole batch used 55 s of QPU time. For comparison, the emulated device (EMU, fake_brisbane) gave 0.965 / 0.962.
 
 ## 2. PS2: Quantum random number generator
 
-**Approach.** $H$ then measure, on 16 parallel qubits per shot (a 1-qubit textbook circuit and an $m$-qubit version). **1,000,000 bits** generated on the simulator in about 2 s, and 163,840 bits from the emulated device batch. Little-endian ordering is handled explicitly (`qrng.memory_to_bits`).
+**Approach.** $H$ then measure, on 16 parallel qubits per shot (a 1-qubit textbook circuit and an $m$-qubit version). **1,000,000 bits** generated on the simulator in about 2 s, and **819,200 physically random bits** from IBM ibm_marrakesh (100 qubits × 8192 shots). Little-endian ordering is handled explicitly (`qrng.memory_to_bits`).
 
 **Statistics.** 10 NIST SP 800-22-style tests implemented from the specification ($\alpha=0.01$), plus Shannon and min-entropy:
 
@@ -52,6 +52,7 @@ The step engine shows the physics: after the Bell CX both q1 and q2 have $|\vec 
 | PCG64 | 10/10 | 7.828 | |
 | Mersenne Twister | 10/10 | 7.828 | |
 | **RANDU** (low byte) | **4/10** | 5.999 | fails longest-run, serial, ApEn, DFT, autocorrelation, byte χ² with p < 1e-4 |
+| **QRNG [HW] ibm_marrakesh** (819,200 bits) | **8/10** | 7.811 | fails monobit and cumulative sums (p = 0.002): a real per-qubit bias, P(1) from 0.435 to 0.530 |
 | QRNG [EMU] (163,840 bits) | 10/10 | 7.489 | smaller sample, so lower plug-in min-entropy |
 
 RANDU is the control that proves the suite discriminates. Its **bit fingerprint** shows stripes where the others look like noise:
@@ -69,7 +70,7 @@ RANDU is the control that proves the suite discriminates. Its **bit fingerprint*
 | XOR pairs | 0.4789 | 50% | 2/10 (bias $0.1\to0.02=2\varepsilon^2$, as predicted) |
 | Toeplitz hashing ($n=1024$, $\varepsilon=2^{-32}$) | 0.4989 | 67.2% | 10/10 |
 
-Toeplitz recovers nearly the source's min-entropy, about 3× Von Neumann's yield, at the cost of an independent seed. On EMU bits ($P(1)=0.4999$) all methods pass, and Toeplitz keeps 94%.
+Toeplitz recovers nearly the source's min-entropy, about 3× Von Neumann's yield, at the cost of an independent seed. **On the real hardware bits** ($P(1)=0.5017$, 8/10 tests), every extractor restores 10/10: Von Neumann keeps 25%, XOR 50%, and Toeplitz 93% (763,200 bits). The first 200k hardware bits alone pass all tests; the bias only becomes detectable with the full sample.
 
 ## 3. PS3: Deutsch–Jozsa
 
@@ -91,7 +92,7 @@ Toeplitz recovers nearly the source's min-entropy, about 3× Von Neumann's yield
 
 ![DJ noise](figures/dj_noise.png)
 
-**Device [EMU].** All 10 circuits are classified correctly. Success is 0.98–1.00 for shallow oracles, 0.948 (n=2) and 0.890 (n=3, 109 two-qubit gates after transpilation) for random balanced.
+**Real hardware [HW, ibm_marrakesh].** All 10 circuits are classified correctly. Success is 0.98–0.998 for constant and parity oracles, and 0.888 (n=2, 19 two-qubit gates) and 0.855 (n=3, 75 two-qubit gates) for random balanced oracles. The **teleported-ancilla distributed DJ** ran as one dynamic circuit on hardware: 0.996 (constant) and 0.861 (parity). EMU predicted the same ordering (0.95 and 0.89 for random balanced).
 
 ## 4. The integrated mission: teleported-ancilla Deutsch–Jozsa
 
@@ -113,6 +114,6 @@ The QRNG pool seeds a Haar-random state, the DJ size $n$ and a hidden oracle. Al
 
 **Limitations.** SIM randomness is pseudo-random. EMU uses a calibration snapshot, not today's device. The Toeplitz extractor's guarantee assumes the per-bit min-entropy estimate holds, which is plug-in and i.i.d. assumed. The tomography projection onto the Bloch ball is a simple constrained estimate, not full maximum likelihood.
 
-**Future work.** Run the full batch on IBM hardware (script ready: `scripts/run_hardware.py --submit`). Add Pauli twirling and dynamical decoupling to the teleportation circuit. Use entanglement-swapping relays (multi-hop Q-Relay). Add device-independent randomness certification via a CHSH test.
+**Future work.** Mitigate the feed-forward dephasing (dynamical decoupling during the classical wait). Add Pauli twirling and dynamical decoupling to the teleportation circuit. Use entanglement-swapping relays (multi-hop Q-Relay). Add device-independent randomness certification via a CHSH test.
 
 *References: see `docs/REFERENCES.md`.*

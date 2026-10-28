@@ -81,7 +81,7 @@ interface Props {
  * Bloch sphere with an eased state arrow. Arrow length = |r|: a shrunken arrow is a mixed qubit (e.g. one half
  * of an entangled pair), which is the physically honest picture.
  */
-export function BlochSphere({ vector, color = '#22E4FF', ghost, label, position = [0, 0, 0], scale = 1,
+export function BlochSphere({ vector, color = '#4DFFA6', ghost, label, position = [0, 0, 0], scale = 1,
   showLabels = true, trail = true, dim = false, onDrag }: Props) {
   const arrow = useRef<THREE.Group>(null)
   const ghostRef = useRef<THREE.Group>(null)
@@ -162,11 +162,11 @@ export function BlochSphere({ vector, color = '#22E4FF', ghost, label, position 
         <sphereGeometry args={[1, 48, 32]} />
       </mesh>
       {rings.map((pts, i) => (
-        <Line key={i} points={pts} color={i === 0 ? color : '#3a4a66'} lineWidth={i === 0 ? 1.2 : 0.8} transparent opacity={i === 0 ? 0.55 : 0.4} />
+        <Line key={i} points={pts} color={i === 0 ? color : '#2F4A3E'} lineWidth={i === 0 ? 1.2 : 0.8} transparent opacity={i === 0 ? 0.55 : 0.4} />
       ))}
-      <Line points={[[0, -1.15, 0], [0, 1.15, 0]]} color="#3a4a66" lineWidth={0.8} />
-      <Line points={[[-1.15, 0, 0], [1.15, 0, 0]]} color="#2a3650" lineWidth={0.6} />
-      <Line points={[[0, 0, -1.15], [0, 0, 1.15]]} color="#2a3650" lineWidth={0.6} />
+      <Line points={[[0, -1.15, 0], [0, 1.15, 0]]} color="#2F4A3E" lineWidth={0.8} />
+      <Line points={[[-1.15, 0, 0], [1.15, 0, 0]]} color="#233A30" lineWidth={0.6} />
+      <Line points={[[0, 0, -1.15], [0, 0, 1.15]]} color="#233A30" lineWidth={0.6} />
 
       {/* state arrow: cylinder + cone, unit length along +Y, scaled by |r| */}
       <group ref={arrow}>

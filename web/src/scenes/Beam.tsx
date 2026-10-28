@@ -29,7 +29,7 @@ const frag = /* glsl */ `
     g += 0.35 * exp(-pow(y / 0.5, 2.0)) * (0.5 + 0.5 * sin(ph * 0.5));   // soft core
     float breaks = smoothstep(inc * 1.1 - 0.05, inc * 1.1 + 0.05, noise(vec2(u * 9.0, uTime * 1.5)));
     float flicker = mix(1.0, step(0.25, hash(vec2(floor(uTime * 18.0), 1.0))), inc * 0.8);
-    vec3 cyan = vec3(0.13, 0.89, 1.0); vec3 mag = vec3(1.0, 0.24, 0.65); vec3 red = vec3(1.0, 0.3, 0.37);
+    vec3 cyan = vec3(0.30, 1.0, 0.65); vec3 mag = vec3(0.96, 0.78, 0.29); vec3 red = vec3(1.0, 0.33, 0.44);
     vec3 col = inc < 0.5 ? mix(cyan, mag, inc * 2.0) : mix(mag, red, (inc - 0.5) * 2.0);
     float a = g * env * breaks * flicker * uActive;
     gl_FragColor = vec4(col * a * 1.6, a);
@@ -83,12 +83,12 @@ export function ClassicalWire({ from, to, bits, startedAt }: {
     <group>
       <mesh position={a.clone().add(b).multiplyScalar(0.5)} rotation={[0, 0, Math.atan2(b.y - a.y, b.x - a.x)]}>
         <boxGeometry args={[a.distanceTo(b), 0.008, 0.008]} />
-        <meshBasicMaterial color="#56627a" />
+        <meshBasicMaterial color="#5B7268" />
       </mesh>
       {refs.map((r, i) => (
         <mesh key={i} ref={r} visible={false}>
           <boxGeometry args={[0.13, 0.13, 0.13]} />
-          <meshStandardMaterial color={bits?.[i] ? '#FF3DA5' : '#22E4FF'} emissive={bits?.[i] ? '#FF3DA5' : '#22E4FF'}
+          <meshStandardMaterial color={bits?.[i] ? '#F5C84B' : '#4DFFA6'} emissive={bits?.[i] ? '#F5C84B' : '#4DFFA6'}
             emissiveIntensity={3} toneMapped={false} />
         </mesh>
       ))}

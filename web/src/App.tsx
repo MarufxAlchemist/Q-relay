@@ -14,6 +14,7 @@ import { DemoMode } from './demo/DemoMode'
 import { TitleScreen } from './screens/TitleScreen'
 import { Guide, Help } from './components/Guide'
 import { audio } from './lib/audio'
+import { Starfield } from './components/Starfield'
 
 const NAV: { key: Screen; label: string; hotkey: string }[] = [
   { key: 'mission', label: 'Mission', hotkey: '1' },
@@ -153,6 +154,7 @@ export default function App() {
   const scan = useStore((s) => s.scanlines)
   const presenter = useStore((s) => s.presenter)
   const title = useStore((s) => s.title)
+  const lowPower = useStore((s) => s.lowPower)
 
   // music follows the noise slider; browsers only allow audio after a user gesture
   useEffect(() => useStore.subscribe((st, prev) => { if (st.noise !== prev.noise) audio.setNoise(st.noise) }), [])
@@ -199,7 +201,9 @@ export default function App() {
   }, [])
 
   return (
-    <div className={`app ${scan ? 'scanlines' : ''} ${presenter ? 'presenter' : ''}`}>
+    <>
+    <Starfield />
+    <div className={`app ${scan ? 'scanlines' : ''} ${presenter ? 'presenter' : ''} ${lowPower ? 'low-power' : ''}`}>
       <Hud />
       <main style={{ minHeight: 0, position: 'relative' }}>
         {screen === 'mission' && <MissionControl />}
@@ -217,5 +221,6 @@ export default function App() {
       <AnimatePresence>{!booted && <Boot />}</AnimatePresence>
       {booted && backendOk === false && <Offline />}
     </div>
+    </>
   )
 }
