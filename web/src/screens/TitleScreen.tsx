@@ -108,11 +108,13 @@ export function TitleScreen() {
           <Spinners />
           <Effects />
         </Canvas>
-        <div className="title-plate">
-          <i className="rivet l" /><i className="rivet r" />
-          <div className="title-text">Q-RELAY</div>
+        <div className="title-head">
+          <div className="title-plate">
+            <i className="rivet l" /><i className="rivet r" />
+            <div className="title-text">Q-RELAY</div>
+          </div>
+          <div className="title-sub">QUANTUM NETWORK · MISSION CONTROL</div>
         </div>
-        <div className="title-sub">QUANTUM NETWORK · MISSION CONTROL</div>
         <div className="title-tag">random numbers → teleportation → one-query puzzle</div>
       </div>
 
