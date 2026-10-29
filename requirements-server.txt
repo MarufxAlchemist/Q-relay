@@ -1,0 +1,13 @@
+# Runtime-only dependencies for hosting the API + UI (no notebooks, tests or PDF tooling).
+qiskit==2.6.1
+qiskit-aer==0.18.2
+qiskit-ibm-runtime==0.51.0
+numpy==2.5.4
+scipy==1.18.1
+pandas==3.1.0
+matplotlib==3.11.2
+pylatexenc==2.11
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+websockets==17.3

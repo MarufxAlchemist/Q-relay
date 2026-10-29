@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: q-relay
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    autoDeploy: true

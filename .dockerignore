@@ -1,0 +1,15 @@
+.venv/
+.git/
+**/node_modules/
+web/dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+.vercel
+notebooks/
+docs/
+tests/
+.env
+*.token
+qiskit-ibm.json
+.qiskit/
